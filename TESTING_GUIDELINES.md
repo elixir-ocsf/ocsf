@@ -458,7 +458,124 @@ On merge:
 
 ---
 
-## 11. Anti-patterns to avoid
+## 11. Recommended libraries
+
+Beyond ExUnit and the deps already in `mix.exs`, these libraries
+are recommended when test needs grow.
+
+### Already included
+
+| Library          | Purpose                             | When to use                                |
+|------------------|-------------------------------------|--------------------------------------------|
+| `stream_data`    | Property-based / generative testing | Fuzz validators, enum boundaries           |
+| `ex_json_schema` | JSON Schema validation              | Schema conformance tests (OCSF compliance) |
+| `benchee`        | Performance benchmarking            | `bench/` harness, capacity targets         |
+
+### Recommended additions (add when needed)
+
+| Library       | Hex                                                    | Purpose                         | When to add                                              |
+|---------------|--------------------------------------------------------|---------------------------------|----------------------------------------------------------|
+| `ex_machina`  | [hex](https://hex.pm/packages/ex_machina)              | Test data factories             | When `ocsf_ecto` lands (M2) and tests need persistent fixtures with associations. Overkill for pure struct tests. |
+| `faker`       | [hex](https://hex.pm/packages/faker)                   | Realistic fake data             | When tests need realistic names, emails, IPs, UUIDs. Useful for golden fixtures and property tests. |
+| `mox`         | [hex](https://hex.pm/packages/mox)                     | Behaviour-based mocks           | When sink companions need to mock DB calls in unit tests. Only behind behaviours — never mock concrete modules. |
+| `bypass`      | [hex](https://hex.pm/packages/bypass)                  | HTTP request interception       | When `ocsf_siem_export` (deferred) needs to test HTTP sinks against a fake endpoint. |
+| `hammox`      | [hex](https://hex.pm/packages/hammox)                  | Type-checking mocks             | Alternative to `mox` that validates mock calls match the behaviour's `@spec`. Stricter. |
+| `mix_test_watch` | [hex](https://hex.pm/packages/mix_test_watch)       | Auto-run tests on file change   | Already in deps. Run with `mix test.watch` during development. |
+
+### Usage guidance
+
+**`ex_machina`** — define factories in `test/support/factory.ex`:
+
+```elixir
+defmodule OCSF.Factory do
+  use ExMachina
+
+  def event_factory do
+    %OCSF.Event{
+      metadata: build(:metadata),
+      time: DateTime.utc_now(),
+      category_uid: 3,
+      class_uid: 3002,
+      type_uid: 300_201,
+      activity_id: 1,
+      severity_id: 1,
+      status_id: 1,
+      user: build(:user)
+    }
+  end
+
+  def metadata_factory do
+    %OCSF.Metadata{
+      uid: OCSF.UUID.v7_string(),
+      version: "1.8.0",
+      product: build(:product)
+    }
+  end
+
+  def user_factory do
+    %OCSF.User{
+      uid: OCSF.UUID.v7_string(),
+      name: Faker.Person.name(),
+      email_addr: Faker.Internet.email(),
+      org: %OCSF.Organization{uid: Faker.Company.bs()}
+    }
+  end
+
+  def product_factory do
+    %OCSF.Product{name: "Cryptr", vendor_name: "cryptr"}
+  end
+end
+```
+
+Use in tests:
+
+```elixir
+import OCSF.Factory
+
+test "redacts PII from user" do
+  event = build(:event, user: build(:user, name: "Alice"))
+  redacted = OCSF.redact(event, deny_pii_policy())
+  assert redacted.user.name == nil
+end
+```
+
+**`faker`** — use for realistic but non-deterministic data. Always
+seed for reproducibility when needed:
+
+```elixir
+# Realistic event attrs
+user: %{
+  uid: Faker.UUID.v4(),
+  name: Faker.Person.name(),
+  email_addr: Faker.Internet.email(),
+  org: %{uid: Faker.Internet.domain_word()}
+}
+```
+
+**`mox`** — only for behaviours, never for concrete modules. The
+`OCSF.Sink` behaviour is the primary candidate:
+
+```elixir
+# test/support/mocks.ex
+Mox.defmock(OCSF.MockSink, for: OCSF.Sink)
+
+# in test
+expect(OCSF.MockSink, :write, fn events -> :ok end)
+```
+
+### When NOT to add a library
+
+- Don't add `faker` for tests that need deterministic output
+  (golden fixtures). Use hardcoded values instead.
+- Don't add `ex_machina` for the core `ocsf` library — `defp`
+  helpers in test files are sufficient for struct-only tests.
+  Factories shine when persistence is involved (M2+).
+- Don't add `mox` unless you have a behaviour to mock. The core
+  library has no external deps to mock.
+
+---
+
+## 12. Anti-patterns
 
 - **Test names starting with "test"** — redundant (`test "test
   something"` reads as stuttering).
@@ -478,7 +595,7 @@ On merge:
 
 ---
 
-## 12. Checklist
+## 13. Checklist
 
 Before merging, verify:
 
