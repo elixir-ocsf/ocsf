@@ -36,6 +36,7 @@ defmodule OCSF.MixProject do
     [
       {:jason, "~> 1.4"},
       {:uuid_v7, "~> 0.6"},
+      {:telemetry, "~> 1.0"},
 
       # test-only
       {:ex_json_schema, "~> 0.10", only: :test, runtime: false},
