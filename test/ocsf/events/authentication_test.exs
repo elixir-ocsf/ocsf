@@ -159,11 +159,11 @@ defmodule OCSF.Events.AuthenticationTest do
         }
       )
 
+      on_exit(fn -> Application.delete_env(:ocsf, :event_code) end)
+
       opts = Keyword.put(base_opts(), :event_code_format, :test_fmt)
       assert {:ok, event} = Authentication.logon(opts)
       assert event.metadata.event_code == "authentication:logon"
-
-      Application.delete_env(:ocsf, :event_code)
     end
 
     test "applies default_format from config when no explicit event_code or format" do
@@ -174,10 +174,10 @@ defmodule OCSF.Events.AuthenticationTest do
         }
       )
 
+      on_exit(fn -> Application.delete_env(:ocsf, :event_code) end)
+
       assert {:ok, event} = Authentication.logon(base_opts())
       assert event.metadata.event_code == "authentication-logon"
-
-      Application.delete_env(:ocsf, :event_code)
     end
 
     test "explicit event_code takes precedence over event_code_format" do
@@ -187,6 +187,8 @@ defmodule OCSF.Events.AuthenticationTest do
         }
       )
 
+      on_exit(fn -> Application.delete_env(:ocsf, :event_code) end)
+
       opts =
         base_opts()
         |> Keyword.put(:event_code, "explicit:code")
@@ -194,8 +196,6 @@ defmodule OCSF.Events.AuthenticationTest do
 
       assert {:ok, event} = Authentication.logon(opts)
       assert event.metadata.event_code == "explicit:code"
-
-      Application.delete_env(:ocsf, :event_code)
     end
 
     test "nonexistent format name leaves event_code nil" do

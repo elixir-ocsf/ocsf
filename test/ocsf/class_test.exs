@@ -3,37 +3,52 @@ defmodule OCSF.ClassTest do
 
   alias OCSF.Class
 
-  test "values/0 returns all classes" do
-    values = Class.values()
-    assert {:Authentication, 3002} in values
-    assert {:"Account Change", 3001} in values
-    assert {:Authorization, 3003} in values
-    assert {:"API Activity", 6003} in values
+  describe "values/0" do
+    test "returns all classes" do
+      values = Class.values()
+      assert {:Authentication, 3002} in values
+      assert {:"Account Change", 3001} in values
+      assert {:Authorization, 3003} in values
+      assert {:"API Activity", 6003} in values
+    end
   end
 
-  test "uid/1 and name/1 round-trip" do
-    assert Class.uid(:Authentication) == 3002
-    assert Class.name(3002) == :Authentication
-    assert Class.uid(:nonexistent) == nil
-    assert Class.name(0) == nil
+  describe "uid/1" do
+    test "returns uid for known class and nil for unknown" do
+      assert Class.uid(:Authentication) == 3002
+      assert Class.uid(:nonexistent) == nil
+    end
   end
 
-  test "category/1 returns the correct category_uid" do
-    assert Class.category(3001) == 3
-    assert Class.category(3002) == 3
-    assert Class.category(3003) == 3
-    assert Class.category(6003) == 6
-    assert Class.category(9999) == nil
+  describe "name/1" do
+    test "returns name for known uid and nil for unknown" do
+      assert Class.name(3002) == :Authentication
+      assert Class.name(0) == nil
+    end
   end
 
-  test "valid?/1 checks both atoms and integers" do
-    assert Class.valid?(:Authentication)
-    assert Class.valid?(3002)
-    refute Class.valid?(:fake)
-    refute Class.valid?(0)
+  describe "category/1" do
+    test "returns the correct category_uid" do
+      assert Class.category(3001) == 3
+      assert Class.category(3002) == 3
+      assert Class.category(3003) == 3
+      assert Class.category(6003) == 6
+      assert Class.category(9999) == nil
+    end
   end
 
-  test "ecto_values/0 matches values/0" do
-    assert Class.ecto_values() == Class.values()
+  describe "valid?/1" do
+    test "checks both atoms and integers" do
+      assert Class.valid?(:Authentication)
+      assert Class.valid?(3002)
+      refute Class.valid?(:fake)
+      refute Class.valid?(0)
+    end
+  end
+
+  describe "ecto_values/0" do
+    test "matches values/0" do
+      assert Class.ecto_values() == Class.values()
+    end
   end
 end

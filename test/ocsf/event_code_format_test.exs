@@ -1,9 +1,12 @@
 defmodule OCSF.EventCodeFormatTest do
   use ExUnit.Case, async: true
 
+  import OCSF.EventFixtures, only: [valid_event_attrs: 0]
+
   defp test_event do
-    {:ok, event} =
-      OCSF.Event.new(
+    attrs =
+      valid_event_attrs()
+      |> Keyword.merge(
         metadata: %OCSF.Metadata{
           uid: "test-uid",
           version: "1.8.0",
@@ -13,15 +16,10 @@ defmodule OCSF.EventCodeFormatTest do
           }
         },
         time: ~U[2026-04-15 10:00:00Z],
-        category_uid: 3,
-        class_uid: 3002,
-        type_uid: 300_201,
-        activity_id: 1,
-        severity_id: 1,
-        status_id: 1,
         user: %OCSF.User{uid: "u1"}
       )
 
+    {:ok, event} = OCSF.Event.new(attrs)
     event
   end
 
@@ -144,12 +142,12 @@ defmodule OCSF.EventCodeFormatTest do
         }
       )
 
+      on_exit(fn -> Application.delete_env(:ocsf, :event_code) end)
+
       format = OCSF.EventCodeFormat.get(:test_format)
       assert %OCSF.EventCodeFormat{} = format
       assert format.fields == [[:class_name], [:activity_name]]
       assert format.separator == "-"
-
-      Application.delete_env(:ocsf, :event_code)
     end
   end
 
@@ -161,8 +159,8 @@ defmodule OCSF.EventCodeFormatTest do
 
     test "returns configured default format name" do
       Application.put_env(:ocsf, :event_code, default_format: :my_format)
+      on_exit(fn -> Application.delete_env(:ocsf, :event_code) end)
       assert OCSF.EventCodeFormat.default_format() == :my_format
-      Application.delete_env(:ocsf, :event_code)
     end
   end
 

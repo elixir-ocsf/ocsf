@@ -13,21 +13,12 @@ end
 defmodule OCSF.PolicyTest do
   use ExUnit.Case, async: true
 
+  import OCSF.EventFixtures, only: [valid_event_attrs: 0]
+
   defp valid_event do
-    {:ok, event} =
-      OCSF.Event.new(
-        metadata: %OCSF.Metadata{
-          uid: "test-uid",
-          version: "1.8.0",
-          product: %OCSF.Product{name: "Test"}
-        },
-        time: DateTime.utc_now(),
-        category_uid: 3,
-        class_uid: 3002,
-        type_uid: 300_201,
-        activity_id: 1,
-        severity_id: 1,
-        status_id: 1,
+    attrs =
+      valid_event_attrs()
+      |> Keyword.merge(
         user: %OCSF.User{
           uid: "u1",
           name: "Alice",
@@ -43,6 +34,7 @@ defmodule OCSF.PolicyTest do
         src_endpoint: %OCSF.NetworkEndpoint{ip: {10, 0, 0, 1}, port: 443, hostname: "host.local"}
       )
 
+    {:ok, event} = OCSF.Event.new(attrs)
     event
   end
 

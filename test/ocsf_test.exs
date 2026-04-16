@@ -1,29 +1,29 @@
 defmodule OCSFTest do
   use ExUnit.Case, async: true
 
+  import OCSF.EventFixtures, only: [valid_event_attrs: 0]
+
   defp valid_event do
-    {:ok, event} =
-      OCSF.Event.new(
+    attrs =
+      valid_event_attrs()
+      |> Keyword.merge(
         metadata: %OCSF.Metadata{
           uid: "test-uid",
           version: "1.8.0",
           product: %OCSF.Product{name: "Test"}
         },
         time: ~U[2026-04-15 10:00:00Z],
-        category_uid: 3,
-        class_uid: 3002,
-        type_uid: 300_201,
-        activity_id: 1,
-        severity_id: 1,
-        status_id: 1,
         user: %OCSF.User{uid: "u1"}
       )
 
+    {:ok, event} = OCSF.Event.new(attrs)
     event
   end
 
-  test "version/0 returns OCSF 1.8.0" do
-    assert OCSF.version() == "1.8.0"
+  describe "version/0" do
+    test "returns OCSF 1.8.0" do
+      assert OCSF.version() == "1.8.0"
+    end
   end
 
   describe "to_map/1" do

@@ -3,33 +3,43 @@ defmodule OCSF.CategoryTest do
 
   alias OCSF.Category
 
-  test "values/0 returns all categories" do
-    values = Category.values()
-    assert length(values) == 2
-    assert {:"Identity & Access Management", 3} in values
-    assert {:"Application Activity", 6} in values
+  describe "values/0" do
+    test "returns all categories" do
+      values = Category.values()
+      assert length(values) == 2
+      assert {:"Identity & Access Management", 3} in values
+      assert {:"Application Activity", 6} in values
+    end
   end
 
-  test "uid/1 returns the uid for a category name" do
-    assert Category.uid(:"Identity & Access Management") == 3
-    assert Category.uid(:"Application Activity") == 6
-    assert Category.uid(:nonexistent) == nil
+  describe "uid/1" do
+    test "returns the uid for a category name" do
+      assert Category.uid(:"Identity & Access Management") == 3
+      assert Category.uid(:"Application Activity") == 6
+      assert Category.uid(:nonexistent) == nil
+    end
   end
 
-  test "name/1 returns the name for a category uid" do
-    assert Category.name(3) == :"Identity & Access Management"
-    assert Category.name(6) == :"Application Activity"
-    assert Category.name(999) == nil
+  describe "name/1" do
+    test "returns the name for a category uid" do
+      assert Category.name(3) == :"Identity & Access Management"
+      assert Category.name(6) == :"Application Activity"
+      assert Category.name(999) == nil
+    end
   end
 
-  test "valid?/1 checks both atoms and integers" do
-    assert Category.valid?(:"Identity & Access Management")
-    assert Category.valid?(3)
-    refute Category.valid?(:fake)
-    refute Category.valid?(999)
+  describe "valid?/1" do
+    test "checks both atoms and integers" do
+      assert Category.valid?(:"Identity & Access Management")
+      assert Category.valid?(3)
+      refute Category.valid?(:fake)
+      refute Category.valid?(999)
+    end
   end
 
-  test "ecto_values/0 matches values/0" do
-    assert Category.ecto_values() == Category.values()
+  describe "ecto_values/0" do
+    test "matches values/0" do
+      assert Category.ecto_values() == Category.values()
+    end
   end
 end

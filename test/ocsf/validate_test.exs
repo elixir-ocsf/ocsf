@@ -1,26 +1,7 @@
 defmodule OCSF.ValidateTest do
   use ExUnit.Case, async: true
 
-  defp valid_event do
-    {:ok, event} =
-      OCSF.Event.new(
-        metadata: %OCSF.Metadata{
-          uid: OCSF.UUID.v7_string(),
-          version: "1.8.0",
-          product: %OCSF.Product{name: "Test"}
-        },
-        time: DateTime.utc_now(),
-        category_uid: 3,
-        class_uid: 3002,
-        type_uid: 300_201,
-        activity_id: 1,
-        severity_id: 1,
-        status_id: 1,
-        user: %OCSF.User{uid: "test-user"}
-      )
-
-    event
-  end
+  import OCSF.EventFixtures
 
   describe "validate/1" do
     test "valid Authentication event passes all checks" do
