@@ -1,0 +1,32 @@
+{
+  "status": "Success",
+  "time": "2026-04-15T10:11:59.100Z",
+  "user": {
+    "uid": "018f19fe-6d4c-71c2-a84b-5d2d8c7f1e90",
+    "org": {
+      "uid": "communitiz-app"
+    }
+  },
+  "service": {
+    "name": "Cryptr Auth"
+  },
+  "metadata": {
+    "version": "1.8.0",
+    "product": {
+      "name": "Cryptr"
+    },
+    "uid": "018f1a03-1a7e-7a30-8d01-a6aa36ac0b00"
+  },
+  "severity": "Informational",
+  "auth_protocol": "SAML",
+  "activity_id": 6,
+  "auth_protocol_id": 5,
+  "category_uid": 3,
+  "class_uid": 3002,
+  "severity_id": 1,
+  "status_id": 1,
+  "type_uid": 300206,
+  "activity_name": "Preauth",
+  "category_name": "Identity & Access Management",
+  "class_name": "Authentication"
+}

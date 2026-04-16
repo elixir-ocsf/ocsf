@@ -1,0 +1,31 @@
+{
+  "status": "Failure",
+  "time": "2026-04-15T10:12:05.000Z",
+  "user": {
+    "uid": "018f19fe-6d4c-71c2-a84b-5d2d8c7f1e90",
+    "org": {
+      "uid": "communitiz-app"
+    }
+  },
+  "service": {
+    "name": "Cryptr Auth"
+  },
+  "metadata": {
+    "version": "1.8.0",
+    "product": {
+      "name": "Cryptr"
+    },
+    "uid": "018f1a03-3b9c-7c50-af23-c8bb58ce1d12"
+  },
+  "severity": "Medium",
+  "status_detail": "invalid_credentials",
+  "activity_id": 1,
+  "category_uid": 3,
+  "class_uid": 3002,
+  "severity_id": 3,
+  "status_id": 2,
+  "type_uid": 300201,
+  "activity_name": "Logon",
+  "category_name": "Identity & Access Management",
+  "class_name": "Authentication"
+}

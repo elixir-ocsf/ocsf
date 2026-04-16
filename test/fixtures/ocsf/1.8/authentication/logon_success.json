@@ -1,0 +1,42 @@
+{
+  "http_request": {
+    "url": "/oauth/token",
+    "http_method": "POST",
+    "user_agent": "Mozilla/5.0"
+  },
+  "status": "Success",
+  "time": "2026-04-15T10:12:03.421Z",
+  "user": {
+    "name": "Jane Doe",
+    "uid": "018f19fe-6d4c-71c2-a84b-5d2d8c7f1e90",
+    "email_addr": "jane@example.com",
+    "org": {
+      "uid": "communitiz-app"
+    }
+  },
+  "service": {
+    "name": "Cryptr Auth"
+  },
+  "metadata": {
+    "version": "1.8.0",
+    "product": {
+      "name": "Cryptr"
+    },
+    "uid": "018f1a03-2a8f-7b40-9e12-b7aa47bd0c01"
+  },
+  "severity": "Informational",
+  "src_endpoint": {
+    "ip": "10.0.0.1"
+  },
+  "auth_protocol": "OAUTH 2.0",
+  "activity_id": 1,
+  "auth_protocol_id": 6,
+  "category_uid": 3,
+  "class_uid": 3002,
+  "severity_id": 1,
+  "status_id": 1,
+  "type_uid": 300201,
+  "activity_name": "Logon",
+  "category_name": "Identity & Access Management",
+  "class_name": "Authentication"
+}

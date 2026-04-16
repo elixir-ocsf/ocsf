@@ -290,4 +290,28 @@ defmodule OCSF.Events.AuthenticationTest do
       assert event.time == t
     end
   end
+
+  describe "unmapped guard" do
+    test "builder does not populate unmapped unless explicitly provided" do
+      {:ok, event} = Authentication.logon(base_opts())
+      assert event.unmapped == nil
+    end
+
+    test "builder passes through explicit unmapped" do
+      {:ok, event} = Authentication.logon(base_opts() ++ [unmapped: %{custom: "data"}])
+      assert event.unmapped == %{custom: "data"}
+    end
+
+    test "serialized output omits unmapped when nil" do
+      {:ok, event} = Authentication.logon(base_opts())
+      map = OCSF.to_map(event)
+      refute Map.has_key?(map, :unmapped)
+    end
+
+    test "serialized output includes unmapped when set" do
+      {:ok, event} = Authentication.logon(base_opts() ++ [unmapped: %{x: 1}])
+      map = OCSF.to_map(event)
+      assert map[:unmapped] == %{x: 1}
+    end
+  end
 end
