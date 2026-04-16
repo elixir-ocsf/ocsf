@@ -5,10 +5,10 @@ defmodule OCSF.StatusTest do
 
   test "values/0 covers OCSF 1.8 status values" do
     values = Status.values()
-    assert {:"Unknown", 0} in values
-    assert {:"Success", 1} in values
-    assert {:"Failure", 2} in values
-    assert {:"Other", 99} in values
+    assert {:Unknown, 0} in values
+    assert {:Success, 1} in values
+    assert {:Failure, 2} in values
+    assert {:Other, 99} in values
     assert length(values) == 4
   end
 

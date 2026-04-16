@@ -9,6 +9,7 @@ defmodule OCSF.Service do
 
   defstruct [:name, :uid, :version]
 
+  @spec __ocsf_fields__() :: keyword()
   def __ocsf_fields__ do
     [
       name: [class: :taxonomic, erasable: false],

@@ -11,6 +11,7 @@ defmodule OCSF.User do
 
   defstruct [:uid, :name, :email_addr, :org, :type_id]
 
+  @spec __ocsf_fields__() :: keyword()
   def __ocsf_fields__ do
     [
       uid: [class: :identifier, erasable: false],

@@ -5,12 +5,12 @@ defmodule OCSF.AuthProtocolTest do
 
   test "values/0 covers OCSF 1.8 auth protocols" do
     values = AuthProtocol.values()
-    assert {:"Unknown", 0} in values
-    assert {:"SAML", 5} in values
+    assert {:Unknown, 0} in values
+    assert {:SAML, 5} in values
     assert {:"OAUTH 2.0", 6} in values
     assert {:"Basic Authentication", 11} in values
-    assert {:"LDAP", 12} in values
-    assert {:"Other", 99} in values
+    assert {:LDAP, 12} in values
+    assert {:Other, 99} in values
     assert length(values) == 14
   end
 

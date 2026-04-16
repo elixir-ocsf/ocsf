@@ -8,6 +8,7 @@ defmodule OCSF.Organization do
 
   defstruct [:uid, :name]
 
+  @spec __ocsf_fields__() :: keyword()
   def __ocsf_fields__ do
     [
       uid: [class: :tenant, erasable: false],

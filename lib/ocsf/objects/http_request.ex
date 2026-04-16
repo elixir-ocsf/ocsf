@@ -9,6 +9,7 @@ defmodule OCSF.HttpRequest do
 
   defstruct [:url, :user_agent, :http_method]
 
+  @spec __ocsf_fields__() :: keyword()
   def __ocsf_fields__ do
     [
       url: [class: :network, erasable: false],

@@ -23,6 +23,7 @@ defmodule OCSF.Metadata do
     span_uid: nil
   ]
 
+  @spec __ocsf_fields__() :: keyword()
   def __ocsf_fields__ do
     [
       uid: [class: :identifier, erasable: false],

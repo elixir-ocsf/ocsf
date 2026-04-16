@@ -8,6 +8,7 @@ defmodule OCSF.Actor do
 
   defstruct [:user, :session]
 
+  @spec __ocsf_fields__() :: keyword()
   def __ocsf_fields__ do
     [
       user: [class: :identity, erasable: false],

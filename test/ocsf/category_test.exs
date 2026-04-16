@@ -5,7 +5,7 @@ defmodule OCSF.CategoryTest do
 
   test "values/0 returns all categories" do
     values = Category.values()
-    assert is_list(values)
+    assert length(values) == 2
     assert {:"Identity & Access Management", 3} in values
     assert {:"Application Activity", 6} in values
   end

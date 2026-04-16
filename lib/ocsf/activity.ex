@@ -3,45 +3,45 @@ defmodule OCSF.Activity do
 
   @mappings %{
     3002 => [
-      {:"Unknown", 0},
-      {:"Logon", 1},
-      {:"Logoff", 2},
+      {:Unknown, 0},
+      {:Logon, 1},
+      {:Logoff, 2},
       {:"Authentication Ticket", 3},
       {:"Service Ticket Request", 4},
       {:"Service Ticket Renew", 5},
-      {:"Preauth", 6},
+      {:Preauth, 6},
       {:"Account Switch", 7},
-      {:"Other", 99}
+      {:Other, 99}
     ],
     3001 => [
-      {:"Unknown", 0},
-      {:"Create", 1},
-      {:"Enable", 2},
+      {:Unknown, 0},
+      {:Create, 1},
+      {:Enable, 2},
       {:"Password Change", 3},
       {:"Password Reset", 4},
-      {:"Disable", 5},
-      {:"Delete", 6},
+      {:Disable, 5},
+      {:Delete, 6},
       {:"Attach Policy", 7},
       {:"Detach Policy", 8},
-      {:"Lock", 9},
+      {:Lock, 9},
       {:"MFA Factor Enable", 10},
       {:"MFA Factor Disable", 11},
-      {:"Unlock", 12},
-      {:"Other", 99}
+      {:Unlock, 12},
+      {:Other, 99}
     ],
     3003 => [
-      {:"Unknown", 0},
+      {:Unknown, 0},
       {:"Assign Privileges", 1},
       {:"Revoke Privileges", 2},
-      {:"Other", 99}
+      {:Other, 99}
     ],
     6003 => [
-      {:"Unknown", 0},
-      {:"Create", 1},
-      {:"Read", 2},
-      {:"Update", 3},
-      {:"Delete", 4},
-      {:"Other", 99}
+      {:Unknown, 0},
+      {:Create, 1},
+      {:Read, 2},
+      {:Update, 3},
+      {:Delete, 4},
+      {:Other, 99}
     ]
   }
 

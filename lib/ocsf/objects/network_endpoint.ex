@@ -9,6 +9,7 @@ defmodule OCSF.NetworkEndpoint do
 
   defstruct [:ip, :port, :hostname]
 
+  @spec __ocsf_fields__() :: keyword()
   def __ocsf_fields__ do
     [
       ip: [class: :network, erasable: false],

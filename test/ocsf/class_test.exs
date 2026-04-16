@@ -5,15 +5,15 @@ defmodule OCSF.ClassTest do
 
   test "values/0 returns all classes" do
     values = Class.values()
-    assert {:"Authentication", 3002} in values
+    assert {:Authentication, 3002} in values
     assert {:"Account Change", 3001} in values
-    assert {:"Authorization", 3003} in values
+    assert {:Authorization, 3003} in values
     assert {:"API Activity", 6003} in values
   end
 
   test "uid/1 and name/1 round-trip" do
-    assert Class.uid(:"Authentication") == 3002
-    assert Class.name(3002) == :"Authentication"
+    assert Class.uid(:Authentication) == 3002
+    assert Class.name(3002) == :Authentication
     assert Class.uid(:nonexistent) == nil
     assert Class.name(0) == nil
   end
@@ -27,7 +27,7 @@ defmodule OCSF.ClassTest do
   end
 
   test "valid?/1 checks both atoms and integers" do
-    assert Class.valid?(:"Authentication")
+    assert Class.valid?(:Authentication)
     assert Class.valid?(3002)
     refute Class.valid?(:fake)
     refute Class.valid?(0)
