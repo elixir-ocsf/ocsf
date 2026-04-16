@@ -18,4 +18,15 @@ defmodule OCSF.StatusTest do
       assert Status.name(uid) == name
     end
   end
+
+  test "valid?/1 checks both atoms and integers" do
+    assert Status.valid?(:Success)
+    assert Status.valid?(1)
+    refute Status.valid?(:fake)
+    refute Status.valid?(42)
+  end
+
+  test "ecto_values/0 matches values/0" do
+    assert Status.ecto_values() == Status.values()
+  end
 end

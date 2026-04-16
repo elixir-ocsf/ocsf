@@ -147,8 +147,10 @@
               # Encourages Stream over Enum for large/lazy pipelines
               {BlitzCredoChecks.UseStream, []},
 
-              # Ensures warnings_as_errors is set in test config
-              {BlitzCredoChecks.SetWarningsAsErrorsInTest, []}
+              # Disabled: SetWarningsAsErrorsInTest — requires Code.put_compiler_option/2
+              # which is deprecated in Elixir 1.19+. The project enforces
+              # warnings_as_errors via elixirc_options in mix.exs instead.
+              # {BlitzCredoChecks.SetWarningsAsErrorsInTest, []}
             ] ++
             # ---------------------------------------------------------------
             # Oeditus Credo Checks — complementary to Sobelow

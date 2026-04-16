@@ -29,4 +29,8 @@ defmodule OCSF.SeverityTest do
     refute Severity.valid?(:fake)
     refute Severity.valid?(42)
   end
+
+  test "ecto_values/0 matches values/0" do
+    assert Severity.ecto_values() == Severity.values()
+  end
 end

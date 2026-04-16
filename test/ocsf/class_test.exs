@@ -32,4 +32,8 @@ defmodule OCSF.ClassTest do
     refute Class.valid?(:fake)
     refute Class.valid?(0)
   end
+
+  test "ecto_values/0 matches values/0" do
+    assert Class.ecto_values() == Class.values()
+  end
 end

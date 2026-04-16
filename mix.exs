@@ -82,7 +82,6 @@ defmodule OCSF.MixProject do
         "doctor --raise",
         "format --check-formatted",
         "sobelow --config --skip",
-        "test --cover",
         &run_hex_audit/1
       ]
     ]

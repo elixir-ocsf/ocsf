@@ -29,4 +29,8 @@ defmodule OCSF.AuthProtocolTest do
     refute AuthProtocol.valid?(:fake)
     refute AuthProtocol.valid?(42)
   end
+
+  test "ecto_values/0 matches values/0" do
+    assert AuthProtocol.ecto_values() == AuthProtocol.values()
+  end
 end
