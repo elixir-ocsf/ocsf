@@ -196,6 +196,120 @@ module + function capture:
 )
 ```
 
+### 4.5 Deterministic doubles (adapter pattern)
+
+Builders call `DateTime.utc_now()` and `OCSF.UUID.v7_string()`
+internally, which makes golden-fixture and snapshot tests
+non-deterministic. Use the **adapter pattern** to inject
+deterministic values in tests.
+
+**Override via opts** — the simplest approach. Builders already
+accept `:time` and `:metadata` overrides:
+
+```elixir
+# Deterministic — suitable for golden fixtures
+{:ok, event} =
+  Authentication.logon(
+    user: %{uid: "fixture-uid"},
+    time: ~U[2026-04-15 10:00:00Z],
+    metadata: %{uid: "fixture-meta-uid", product: %{name: "Test"}}
+  )
+```
+
+**Clock / UUID adapter** — when determinism is needed deeper in
+the stack (e.g. inside a pipeline that calls builders), define a
+behaviour and swap implementations:
+
+```elixir
+# lib/ocsf/clock.ex (production)
+defmodule OCSF.Clock do
+  @callback utc_now() :: DateTime.t()
+  def utc_now, do: impl().utc_now()
+  defp impl, do: Application.get_env(:ocsf, :clock, OCSF.Clock.System)
+end
+
+# test/support/clock_stub.ex
+defmodule OCSF.Clock.Stub do
+  @behaviour OCSF.Clock
+  def utc_now, do: ~U[2026-04-15 10:00:00Z]
+end
+
+# test setup
+Application.put_env(:ocsf, :clock, OCSF.Clock.Stub)
+```
+
+Add the adapter pattern **only when opts overrides aren't
+sufficient** — don't over-abstract for tests that can simply pass
+`:time` and `:metadata`.
+
+### 4.6 Helper taxonomy
+
+Structure `test/support/` helpers into three categories (inspired
+by the Elixir testing patterns community):
+
+| Category      | Naming          | Purpose                            | Returns            |
+|---------------|-----------------|------------------------------------|--------------------|
+| **Setup**     | `with_*`        | Create test data in context        | Augmented context  |
+| **Assert**    | `assert_*`      | Domain-specific validations        | Input (for chaining) |
+| **Stub**      | `stub_*`        | Configure mocks / app config       | Context unchanged  |
+
+All helpers accept and return the test context map, enabling
+composable setup chains:
+
+```elixir
+# test/support/setup_helper.ex
+defmodule OCSF.SetupHelper do
+  @moduledoc false
+
+  def with_logon_event(context) do
+    {:ok, event} =
+      OCSF.Events.Authentication.logon(
+        user: %{uid: "u1", org: %{uid: "acme"}},
+        time: ~U[2026-04-15 10:00:00Z]
+      )
+
+    Map.put(context, :event, event)
+  end
+
+  def with_deny_pii_policy(context) do
+    policy = %OCSF.Policy{
+      deny: [:contact, :identity, :network],
+      allow: [:identifier, :tenant, :taxonomic, :temporal]
+    }
+
+    Map.put(context, :policy, policy)
+  end
+end
+
+# test/support/assert_helper.ex
+defmodule OCSF.AssertHelper do
+  @moduledoc false
+  import ExUnit.Assertions
+
+  def assert_no_pii(event) do
+    assert event.user.name == nil
+    assert event.user.email_addr == nil
+    event
+  end
+end
+```
+
+Use in tests:
+
+```elixir
+setup [:with_logon_event, :with_deny_pii_policy]
+
+test "redaction removes PII", %{event: event, policy: policy} do
+  event
+  |> OCSF.redact(policy)
+  |> assert_no_pii()
+end
+```
+
+Extract helpers **only when a pattern repeats 3+ times across
+test files.** Don't pre-extract — wait for the duplication to
+appear naturally.
+
 ---
 
 ## 5. Assertions
