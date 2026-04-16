@@ -28,12 +28,54 @@ Every `@moduledoc` follows this order:
 
 1. **Opening summary** — one paragraph, plain language, no jargon.
    Answers: "What is this module and when do I use it?"
-2. **Example** — minimal working code showing the primary use case.
+2. **Example** — a short, *unique* code snippet that shows the module
+   in context (e.g. how it fits in an event-building pipeline). This
+   is NOT a doctest — it demonstrates the "why", not the API surface.
    Appears before any deep-dive sections.
 3. **Sections** — `##` headings for distinct topics (options, types,
    edge cases, OCSF mapping, etc.).
 4. **Cross-references** — links to related modules at the end, not
    scattered throughout.
+
+### 2.1.1 No-duplication rule
+
+> **Module examples must not repeat function examples.**
+> `@moduledoc` examples show the module *in context* — how it
+> connects to other modules or fits in a workflow. `@doc` examples
+> show the *individual function's* inputs and outputs. If a doctest
+> on `uid/1` says `OCSF.Severity.uid(:Informational) => 1`, the
+> `@moduledoc` must NOT repeat that same call. Instead, the module
+> example shows a *usage scenario*:
+
+```elixir
+# Good @moduledoc example (contextual, not a function repeat):
+@moduledoc """
+...
+## Example
+
+    # Resolve a severity atom to the OCSF integer for an event:
+    severity_id = OCSF.Severity.uid(:Informational)
+    # severity_id is used when building %OCSF.Event{}
+...
+"""
+
+# Bad @moduledoc example (duplicates the @doc on uid/1):
+@moduledoc """
+...
+## Examples
+
+    iex> OCSF.Severity.uid(:Informational)
+    1
+
+    iex> OCSF.Severity.name(1)
+    :Informational
+...
+"""
+```
+
+When the module has only one or two functions and a contextual
+example would be forced, **omit the `## Example` section from
+`@moduledoc` entirely** — the function doctests are sufficient.
 
 ### 2.2 Opening summary examples
 

@@ -8,11 +8,6 @@ defmodule OCSF do
   Persistence-agnostic core with optional Postgres (`ocsf_ecto`) and
   ClickHouse (`ocsf_clickhouse`) sinks.
 
-  ## Examples
-
-      iex> OCSF.version()
-      "1.8.0"
-
   See `OCSF.Category`, `OCSF.Class`, `OCSF.Activity`, `OCSF.Severity`,
   `OCSF.Status`, and `OCSF.Classification` for the core enums and taxonomy.
   """

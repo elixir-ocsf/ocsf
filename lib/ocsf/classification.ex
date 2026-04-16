@@ -20,14 +20,6 @@ defmodule OCSF.Classification do
   | `:geolocation` | No   | `:deny`        |
   | `:credential`  | Yes  | `:deny`        |
 
-  ## Examples
-
-      iex> OCSF.Classification.pii?(:contact)
-      true
-
-      iex> OCSF.Classification.default_policy(:identifier)
-      :allow
-
   See `OCSF.User`, `OCSF.Organization`, and other struct modules for
   per-field classification via `__ocsf_fields__/0`.
   """
