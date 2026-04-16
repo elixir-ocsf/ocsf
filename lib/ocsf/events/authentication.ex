@@ -119,16 +119,18 @@ defmodule OCSF.Events.Authentication do
     base = if is_struct(input, OCSF.Metadata), do: Map.from_struct(input), else: input
 
     %{
-      uid: base[:uid] || base["uid"] || OCSF.UUID.v7_string(),
+      uid: get_base(base, :uid) || OCSF.UUID.v7_string(),
       version: OCSF.version(),
-      product: base[:product] || base["product"] || %OCSF.Product{},
-      profiles: base[:profiles] || base["profiles"] || [],
-      event_code: opts[:event_code] || base[:event_code] || base["event_code"],
+      product: get_base(base, :product) || %OCSF.Product{},
+      profiles: get_base(base, :profiles) || [],
+      event_code: opts[:event_code] || get_base(base, :event_code),
       correlation_uid: opts[:correlation_uid] || correlation_uid,
-      trace_uid: opts[:trace_uid] || base[:trace_uid] || base["trace_uid"],
-      span_uid: opts[:span_uid] || base[:span_uid] || base["span_uid"]
+      trace_uid: opts[:trace_uid] || get_base(base, :trace_uid),
+      span_uid: opts[:span_uid] || get_base(base, :span_uid)
     }
   end
+
+  defp get_base(base, key), do: base[key] || base[to_string(key)]
 
   defp resolve_event_code(event, opts) do
     cond do

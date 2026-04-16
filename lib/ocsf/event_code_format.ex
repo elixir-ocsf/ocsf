@@ -88,10 +88,10 @@ defmodule OCSF.EventCodeFormat do
   def generate(%__MODULE__{} = format, %OCSF.Event{} = event) do
     parts =
       format.fields
-      |> Enum.map(&resolve_field(&1, event))
-      |> Enum.reject(&is_nil/1)
-      |> Enum.reject(&(&1 == ""))
-      |> Enum.map(&normalize/1)
+      |> Stream.map(&resolve_field(&1, event))
+      |> Stream.reject(&is_nil/1)
+      |> Stream.reject(&(&1 == ""))
+      |> Stream.map(&normalize/1)
       |> Enum.reject(&(&1 == ""))
 
     case parts do

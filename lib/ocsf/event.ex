@@ -113,24 +113,24 @@ defmodule OCSF.Event do
 
   def new(attrs) when is_map(attrs) do
     event = %__MODULE__{
-      metadata: cast_metadata(attrs[:metadata] || attrs["metadata"]),
-      time: attrs[:time] || attrs["time"],
-      category_uid: attrs[:category_uid] || attrs["category_uid"],
-      class_uid: attrs[:class_uid] || attrs["class_uid"],
-      type_uid: attrs[:type_uid] || attrs["type_uid"],
-      activity_id: attrs[:activity_id] || attrs["activity_id"],
-      severity_id: attrs[:severity_id] || attrs["severity_id"],
-      status_id: attrs[:status_id] || attrs["status_id"],
-      status_detail: attrs[:status_detail] || attrs["status_detail"],
-      auth_protocol_id: attrs[:auth_protocol_id] || attrs["auth_protocol_id"],
-      actor: cast_if(attrs[:actor] || attrs["actor"], OCSF.Actor),
-      user: cast_if(attrs[:user] || attrs["user"], OCSF.User),
-      http_request: cast_if(attrs[:http_request] || attrs["http_request"], OCSF.HttpRequest),
-      src_endpoint: cast_if(attrs[:src_endpoint] || attrs["src_endpoint"], OCSF.NetworkEndpoint),
-      dst_endpoint: cast_if(attrs[:dst_endpoint] || attrs["dst_endpoint"], OCSF.NetworkEndpoint),
-      service: cast_if(attrs[:service] || attrs["service"], OCSF.Service),
-      raw_data: attrs[:raw_data] || attrs["raw_data"],
-      unmapped: attrs[:unmapped] || attrs["unmapped"]
+      metadata: cast_metadata(get_attr(attrs, :metadata)),
+      time: get_attr(attrs, :time),
+      category_uid: get_attr(attrs, :category_uid),
+      class_uid: get_attr(attrs, :class_uid),
+      type_uid: get_attr(attrs, :type_uid),
+      activity_id: get_attr(attrs, :activity_id),
+      severity_id: get_attr(attrs, :severity_id),
+      status_id: get_attr(attrs, :status_id),
+      status_detail: get_attr(attrs, :status_detail),
+      auth_protocol_id: get_attr(attrs, :auth_protocol_id),
+      actor: cast_if(get_attr(attrs, :actor), OCSF.Actor),
+      user: cast_if(get_attr(attrs, :user), OCSF.User),
+      http_request: cast_if(get_attr(attrs, :http_request), OCSF.HttpRequest),
+      src_endpoint: cast_if(get_attr(attrs, :src_endpoint), OCSF.NetworkEndpoint),
+      dst_endpoint: cast_if(get_attr(attrs, :dst_endpoint), OCSF.NetworkEndpoint),
+      service: cast_if(get_attr(attrs, :service), OCSF.Service),
+      raw_data: get_attr(attrs, :raw_data),
+      unmapped: get_attr(attrs, :unmapped)
     }
 
     {:ok, event}
@@ -154,14 +154,14 @@ defmodule OCSF.Event do
 
   defp cast_metadata(%{} = m) do
     %OCSF.Metadata{
-      uid: m[:uid] || m["uid"],
-      version: m[:version] || m["version"],
-      product: cast_product(m[:product] || m["product"]),
-      profiles: m[:profiles] || m["profiles"] || [],
-      event_code: m[:event_code] || m["event_code"],
-      correlation_uid: m[:correlation_uid] || m["correlation_uid"],
-      trace_uid: m[:trace_uid] || m["trace_uid"],
-      span_uid: m[:span_uid] || m["span_uid"]
+      uid: get_attr(m, :uid),
+      version: get_attr(m, :version),
+      product: cast_product(get_attr(m, :product)),
+      profiles: get_attr(m, :profiles) || [],
+      event_code: get_attr(m, :event_code),
+      correlation_uid: get_attr(m, :correlation_uid),
+      trace_uid: get_attr(m, :trace_uid),
+      span_uid: get_attr(m, :span_uid)
     }
   end
 
@@ -188,6 +188,8 @@ defmodule OCSF.Event do
       version: f[:version] || f["version"]
     }
   end
+
+  defp get_attr(map, key), do: map[key] || map[to_string(key)]
 
   defp cast_if(nil, _mod), do: nil
   defp cast_if(%{__struct__: mod} = s, mod), do: s

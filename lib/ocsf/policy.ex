@@ -71,25 +71,21 @@ defmodule OCSF.Policy do
     fields = mod.__ocsf_fields__()
 
     Enum.reduce(fields, struct, fn {field_name, opts}, acc ->
-      class = opts[:class]
-
-      cond do
-        class == :credential ->
-          Map.put(acc, field_name, nil)
-
-        class in policy.deny ->
-          Map.put(acc, field_name, nil)
-
-        class in policy.allow ->
-          acc
-
-        true ->
-          # Not in allow and not in deny — check default policy
-          case OCSF.Classification.default_policy(class) do
-            :deny -> Map.put(acc, field_name, nil)
-            :allow -> acc
-          end
+      if should_nil_field?(policy, opts[:class]) do
+        Map.put(acc, field_name, nil)
+      else
+        acc
       end
     end)
+  end
+
+  defp should_nil_field?(_policy, :credential), do: true
+
+  defp should_nil_field?(policy, class) when is_atom(class) do
+    cond do
+      class in policy.deny -> true
+      class in policy.allow -> false
+      true -> OCSF.Classification.default_policy(class) == :deny
+    end
   end
 end
