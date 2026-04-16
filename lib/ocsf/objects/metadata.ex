@@ -1,5 +1,32 @@
 defmodule OCSF.Metadata do
-  @moduledoc "OCSF Metadata object."
+  @moduledoc """
+  OCSF Metadata object.
+
+  Carries event-level metadata such as the schema version, correlation
+  identifiers, and product information. Every OCSF event embeds one
+  `%OCSF.Metadata{}` struct.
+
+  Corresponds to the OCSF
+  [Metadata](https://schema.ocsf.io/1.8.0/objects/metadata) object.
+
+  ## Fields
+
+  - `:uid` -- unique event identifier. Classified as `:identifier`.
+  - `:version` -- OCSF schema version (e.g. `"1.8.0"`). Classified as `:taxonomic`.
+  - `:product` -- `%OCSF.Product{}` describing the reporting product. Classified as `:taxonomic`.
+  - `:profiles` -- list of OCSF profile strings applied to the event. Classified as `:taxonomic`.
+  - `:event_code` -- optional application-specific event code. Classified as `:taxonomic`.
+  - `:correlation_uid` -- optional correlation identifier linking related events. Classified as `:identifier`.
+  - `:trace_uid` -- optional distributed-trace identifier. Classified as `:identifier`.
+  - `:span_uid` -- optional span identifier within a trace. Classified as `:identifier`.
+
+  ## PII classification
+
+  See `OCSF.Classification` for data class definitions. Call
+  `__ocsf_fields__/0` to inspect this module's field classifications.
+
+  See `OCSF.Product`, `OCSF.Correlation`, and `OCSF.UUID` for related modules.
+  """
 
   @type t :: %__MODULE__{
           uid: String.t(),
@@ -23,6 +50,7 @@ defmodule OCSF.Metadata do
     span_uid: nil
   ]
 
+  @doc "Return field classification metadata for PII policy enforcement."
   @spec __ocsf_fields__() :: keyword()
   def __ocsf_fields__ do
     [

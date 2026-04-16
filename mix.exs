@@ -2,7 +2,7 @@ defmodule OCSF.MixProject do
   use Mix.Project
 
   @version "0.1.0"
-  @source_url "https://github.com/cryptr-auth/ocsf"
+  @source_url "https://github.com/docjerem/ocsf"
 
   def project do
     [
