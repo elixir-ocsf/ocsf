@@ -16,8 +16,7 @@ defmodule OCSF.ObjectsTest do
   for mod <- @object_modules do
     describe "#{inspect(mod)}" do
       test "__ocsf_fields__/0 returns classified fields matching the struct" do
-        fields = unquote(mod).__ocsf_fields__()
-        assert fields != []
+        [_ | _] = fields = unquote(mod).__ocsf_fields__()
 
         struct_keys = unquote(mod).__struct__() |> Map.from_struct() |> Map.keys()
 

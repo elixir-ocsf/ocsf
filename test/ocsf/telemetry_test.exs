@@ -3,29 +3,26 @@ defmodule OCSF.TelemetryTest do
 
   setup do
     ref = make_ref()
-    test_pid = self()
+    handler_id_new = "test-handler-new-#{inspect(ref)}"
+    handler_id_invalid = "test-handler-invalid-#{inspect(ref)}"
 
     :telemetry.attach(
-      "test-handler-#{inspect(ref)}",
+      handler_id_new,
       [:ocsf, :event, :new],
-      fn event_name, measurements, metadata, _config ->
-        send(test_pid, {:telemetry, event_name, measurements, metadata})
-      end,
-      nil
+      &OCSF.TestTelemetryHandler.handle_event/4,
+      %{pid: self()}
     )
 
     :telemetry.attach(
-      "test-handler-invalid-#{inspect(ref)}",
+      handler_id_invalid,
       [:ocsf, :event, :invalid],
-      fn event_name, measurements, metadata, _config ->
-        send(test_pid, {:telemetry, event_name, measurements, metadata})
-      end,
-      nil
+      &OCSF.TestTelemetryHandler.handle_event/4,
+      %{pid: self()}
     )
 
     on_exit(fn ->
-      :telemetry.detach("test-handler-#{inspect(ref)}")
-      :telemetry.detach("test-handler-invalid-#{inspect(ref)}")
+      :telemetry.detach(handler_id_new)
+      :telemetry.detach(handler_id_invalid)
     end)
 
     :ok
@@ -59,19 +56,17 @@ defmodule OCSF.TelemetryTest do
   describe "emit/3" do
     setup do
       ref = make_ref()
-      test_pid = self()
+      handler_id = "test-emit-handler-#{inspect(ref)}"
 
       :telemetry.attach(
-        "test-emit-handler-#{inspect(ref)}",
+        handler_id,
         [:ocsf, :custom, :test],
-        fn event_name, measurements, metadata, _config ->
-          send(test_pid, {:telemetry, event_name, measurements, metadata})
-        end,
-        nil
+        &OCSF.TestTelemetryHandler.handle_event/4,
+        %{pid: self()}
       )
 
       on_exit(fn ->
-        :telemetry.detach("test-emit-handler-#{inspect(ref)}")
+        :telemetry.detach(handler_id)
       end)
 
       :ok
