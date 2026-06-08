@@ -3,6 +3,7 @@ Source: https://schema.ocsf.io/api/1.8.0/
 Fetched: 2026-04-16
 Files:
   - authentication.json (class 3002)
+  - entity_management.json (class 3004)
   - base_event.json
   - metadata.json (object)
   - user.json (object)

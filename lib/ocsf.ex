@@ -169,5 +169,10 @@ defmodule OCSF do
     do:
       {:error, OCSF.Error.new(:missing, "user", %{reason: "required for Authentication (3002)"})}
 
+  defp check_class_required_fields(%{class_uid: 3004, entity: nil}),
+    do:
+      {:error,
+       OCSF.Error.new(:missing, "entity", %{reason: "required for Entity Management (3004)"})}
+
   defp check_class_required_fields(_), do: :ok
 end
