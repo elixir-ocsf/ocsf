@@ -39,6 +39,7 @@ defmodule OCSF.Serializer do
     |> put_not_nil(:actor, serialize_actor(event.actor))
     |> put_not_nil(:user, serialize_user(event.user))
     |> put_not_nil(:entity, serialize_entity(event.entity))
+    |> put_not_nil(:group, serialize_group(event.group))
     |> put_not_nil(:http_request, serialize_http_request(event.http_request))
     |> put_not_nil(:src_endpoint, serialize_endpoint(event.src_endpoint))
     |> put_not_nil(:dst_endpoint, serialize_endpoint(event.dst_endpoint))
@@ -109,6 +110,16 @@ defmodule OCSF.Serializer do
     |> put_not_nil(:type_id, e.type_id)
     |> put_not_nil(:uid, e.uid)
     |> put_not_nil(:email, e.email)
+  end
+
+  defp serialize_group(nil), do: nil
+
+  defp serialize_group(%OCSF.Group{} = g) do
+    %{}
+    |> put_not_nil(:name, g.name)
+    |> put_not_nil(:uid, g.uid)
+    |> put_not_nil(:type, g.type)
+    |> put_not_nil(:desc, g.desc)
   end
 
   defp serialize_actor(nil), do: nil
