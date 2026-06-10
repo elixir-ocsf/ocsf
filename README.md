@@ -258,7 +258,7 @@ verbatim.
 
 - [OCSF 1.8 Schema](https://schema.ocsf.io/1.8.0/)
 - [OCSF GitHub](https://github.com/ocsf)
-- [ecto_ch](https://hex.pm/packages/ecto_ch) -- ClickHouse Ecto adapter (Plausible)
+- [ecto_ch](https://hex.pm/packages/ecto_ch) -- ClickHouse Ecto adapter
 - [uuid_v7](https://hex.pm/packages/uuid_v7) -- UUIDv7 generation
 
 ## License
