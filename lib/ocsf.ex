@@ -174,5 +174,10 @@ defmodule OCSF do
       {:error,
        OCSF.Error.new(:missing, "entity", %{reason: "required for Entity Management (3004)"})}
 
+  defp check_class_required_fields(%{class_uid: 3006, group: nil}),
+    do:
+      {:error,
+       OCSF.Error.new(:missing, "group", %{reason: "required for Group Management (3006)"})}
+
   defp check_class_required_fields(_), do: :ok
 end

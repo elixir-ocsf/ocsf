@@ -32,6 +32,7 @@ defmodule OCSF.Deserializer do
       actor: parse_if(get(map, :actor), &parse_actor/1),
       user: parse_if(get(map, :user), &parse_user/1),
       entity: parse_if(get(map, :entity), &parse_entity/1),
+      group: parse_if(get(map, :group), &parse_group/1),
       http_request: parse_if(get(map, :http_request), &parse_http_request/1),
       src_endpoint: parse_if(get(map, :src_endpoint), &parse_endpoint/1),
       dst_endpoint: parse_if(get(map, :dst_endpoint), &parse_endpoint/1),
@@ -99,6 +100,15 @@ defmodule OCSF.Deserializer do
       type_id: get(e, :type_id),
       uid: get(e, :uid),
       email: get(e, :email)
+    }
+  end
+
+  defp parse_group(g) do
+    %OCSF.Group{
+      name: get(g, :name),
+      uid: get(g, :uid),
+      type: get(g, :type),
+      desc: get(g, :desc)
     }
   end
 
