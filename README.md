@@ -117,6 +117,24 @@ OCSF.User.__ocsf_fields__()
 #   ]
 ```
 
+## Emitting & persisting events
+
+`ocsf` is the modelling core — it builds and validates events but does not
+write them anywhere. To emit events from a running app and persist them, add a
+**sink** and (for buffered, batched, back-pressured emission on a hot path) the
+**ingestion pipeline**:
+
+| Package | Role | Use it to |
+|---------|------|-----------|
+| [`ocsf_ingest`](https://hex.pm/packages/ocsf_ingest) | ingestion pipeline | dispatch events non-blocking; buffer, batch, and back-pressure writes into any sink |
+| [`ocsf_ecto`](https://hex.pm/packages/ocsf_ecto) | Postgres sink | persist events to Postgres (encrypted PII, idempotent writes) |
+| `ocsf_clickhouse` | ClickHouse sink | high-volume columnar storage *(planned)* |
+
+The end-to-end adoption guide (deps, config, supervision, dispatch, DB-load
+tuning) lives in the [`ocsf_ingest` README](https://hex.pm/packages/ocsf_ingest).
+For low-volume or one-off writes you can call a sink directly
+(`OCSF.Ecto.Sink.write/1`) without the pipeline.
+
 ## Architecture
 
 ```
