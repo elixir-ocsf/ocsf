@@ -24,6 +24,8 @@ defmodule OCSF.Event do
   - `:status_detail` — `String.t() | nil`. Free-form detail.
   - `:auth_protocol_id` — `integer | nil`. Auth protocol.
   - `:user` — `%OCSF.User{} | nil`.
+  - `:entity` — `%OCSF.Entity{} | nil`. Required for Entity Management (3004).
+  - `:group` — `%OCSF.Group{} | nil`. Required for Group Management (3006).
   - `:actor` — `%OCSF.Actor{} | nil`.
   - `:http_request` — `%OCSF.HttpRequest{} | nil`.
   - `:src_endpoint` — `%OCSF.NetworkEndpoint{} | nil`.
@@ -48,6 +50,8 @@ defmodule OCSF.Event do
           auth_protocol_id: integer | nil,
           actor: OCSF.Actor.t() | nil,
           user: OCSF.User.t() | nil,
+          entity: OCSF.Entity.t() | nil,
+          group: OCSF.Group.t() | nil,
           http_request: OCSF.HttpRequest.t() | nil,
           src_endpoint: OCSF.NetworkEndpoint.t() | nil,
           dst_endpoint: OCSF.NetworkEndpoint.t() | nil,
@@ -69,6 +73,8 @@ defmodule OCSF.Event do
     :auth_protocol_id,
     :actor,
     :user,
+    :entity,
+    :group,
     :http_request,
     :src_endpoint,
     :dst_endpoint,
@@ -125,6 +131,8 @@ defmodule OCSF.Event do
       auth_protocol_id: get_attr(attrs, :auth_protocol_id),
       actor: cast_if(get_attr(attrs, :actor), OCSF.Actor),
       user: cast_if(get_attr(attrs, :user), OCSF.User),
+      entity: cast_if(get_attr(attrs, :entity), OCSF.Entity),
+      group: cast_if(get_attr(attrs, :group), OCSF.Group),
       http_request: cast_if(get_attr(attrs, :http_request), OCSF.HttpRequest),
       src_endpoint: cast_if(get_attr(attrs, :src_endpoint), OCSF.NetworkEndpoint),
       dst_endpoint: cast_if(get_attr(attrs, :dst_endpoint), OCSF.NetworkEndpoint),

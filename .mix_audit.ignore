@@ -1,0 +1,12 @@
+# Advisories ignored by `mix deps.audit` (wired via the :audit alias in mix.exs).
+# One advisory ID per line. Lines starting with `#` are comments.
+#
+# GHSA-rhv4-8758-jx7v — Decimal: unbounded exponent in `Decimal.new` enables
+# unauthenticated DoS. Patched in decimal 3.0.0.
+#
+# Not exploitable here: `ocsf` never uses Decimal at runtime. `decimal` is a
+# transitive, dev/test-only dependency (doctor, ex_json_schema) and an optional
+# dep of jason, which `ocsf` never feeds Decimal values. The fix (3.0.0) is
+# unreachable while doctor and ex_json_schema cap decimal at `~> 2.0`.
+# Revisit when those deps widen their constraints.
+GHSA-rhv4-8758-jx7v

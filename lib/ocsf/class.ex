@@ -13,10 +13,12 @@ defmodule OCSF.Class do
 
   | Name                 | ID   | Category |
   |----------------------|------|----------|
-  | `:"Account Change"`  | 3001 | 3        |
-  | `:Authentication`    | 3002 | 3        |
-  | `:Authorization`     | 3003 | 3        |
-  | `:"API Activity"`    | 6003 | 6        |
+  | `:"Account Change"`   | 3001 | 3        |
+  | `:Authentication`     | 3002 | 3        |
+  | `:Authorization`      | 3003 | 3        |
+  | `:"Entity Management"`| 3004 | 3        |
+  | `:"Group Management"` | 3006 | 3        |
+  | `:"API Activity"`     | 6003 | 6        |
 
   See `OCSF.Category` for category definitions and `OCSF.Activity` for
   per-class activity mappings.
@@ -26,6 +28,8 @@ defmodule OCSF.Class do
     {:"Account Change", 3001},
     {:Authentication, 3002},
     {:Authorization, 3003},
+    {:"Entity Management", 3004},
+    {:"Group Management", 3006},
     {:"API Activity", 6003}
   ]
 
@@ -33,6 +37,8 @@ defmodule OCSF.Class do
     3001 => 3,
     3002 => 3,
     3003 => 3,
+    3004 => 3,
+    3006 => 3,
     6003 => 6
   }
 
@@ -45,7 +51,7 @@ defmodule OCSF.Class do
   ## Examples
 
       iex> OCSF.Class.values()
-      [{:"Account Change", 3001}, {:Authentication, 3002}, {:Authorization, 3003}, {:"API Activity", 6003}]
+      [{:"Account Change", 3001}, {:Authentication, 3002}, {:Authorization, 3003}, {:"Entity Management", 3004}, {:"Group Management", 3006}, {:"API Activity", 6003}]
   """
   @spec values() :: [{atom, integer}]
   def values, do: @values
@@ -56,7 +62,7 @@ defmodule OCSF.Class do
   ## Examples
 
       iex> OCSF.Class.ecto_values()
-      [{:"Account Change", 3001}, {:Authentication, 3002}, {:Authorization, 3003}, {:"API Activity", 6003}]
+      [{:"Account Change", 3001}, {:Authentication, 3002}, {:Authorization, 3003}, {:"Entity Management", 3004}, {:"Group Management", 3006}, {:"API Activity", 6003}]
   """
   @spec ecto_values() :: keyword
   def ecto_values, do: @values

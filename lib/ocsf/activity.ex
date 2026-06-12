@@ -60,6 +60,35 @@ defmodule OCSF.Activity do
       {:"Revoke Privileges", 2},
       {:Other, 99}
     ],
+    3004 => [
+      {:Unknown, 0},
+      {:Create, 1},
+      {:Read, 2},
+      {:Update, 3},
+      {:Delete, 4},
+      {:Move, 5},
+      {:Enroll, 6},
+      {:Unenroll, 7},
+      {:Enable, 8},
+      {:Disable, 9},
+      {:Activate, 10},
+      {:Deactivate, 11},
+      {:Suspend, 12},
+      {:Resume, 13},
+      {:Other, 99}
+    ],
+    3006 => [
+      {:Unknown, 0},
+      {:"Assign Privileges", 1},
+      {:"Revoke Privileges", 2},
+      {:"Add User", 3},
+      {:"Remove User", 4},
+      {:Delete, 5},
+      {:Create, 6},
+      {:"Add Subgroup", 7},
+      {:"Remove Subgroup", 8},
+      {:Other, 99}
+    ],
     6003 => [
       {:Unknown, 0},
       {:Create, 1},

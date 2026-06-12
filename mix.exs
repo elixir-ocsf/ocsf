@@ -77,7 +77,7 @@ defmodule OCSF.MixProject do
     [
       audit: [
         "credo --strict",
-        "deps.audit",
+        "deps.audit --ignore-file .mix_audit.ignore",
         "deps.unlock --check-unused",
         "dialyzer --format github",
         "doctor --raise",
