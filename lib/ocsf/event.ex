@@ -26,6 +26,9 @@ defmodule OCSF.Event do
   - `:user` — `%OCSF.User{} | nil`.
   - `:entity` — `%OCSF.Entity{} | nil`. Required for Entity Management (3004).
   - `:group` — `%OCSF.Group{} | nil`. Required for Group Management (3006).
+  - `:api` — `%OCSF.Api{} | nil`. Required for API Activity (6003).
+  - `:privileges` — `[String.t()] | nil`. List of assigned/revoked
+    privileges. Required for User Access Management (3005).
   - `:actor` — `%OCSF.Actor{} | nil`.
   - `:http_request` — `%OCSF.HttpRequest{} | nil`.
   - `:src_endpoint` — `%OCSF.NetworkEndpoint{} | nil`.
@@ -52,6 +55,8 @@ defmodule OCSF.Event do
           user: OCSF.User.t() | nil,
           entity: OCSF.Entity.t() | nil,
           group: OCSF.Group.t() | nil,
+          api: OCSF.Api.t() | nil,
+          privileges: [String.t()] | nil,
           http_request: OCSF.HttpRequest.t() | nil,
           src_endpoint: OCSF.NetworkEndpoint.t() | nil,
           dst_endpoint: OCSF.NetworkEndpoint.t() | nil,
@@ -75,6 +80,8 @@ defmodule OCSF.Event do
     :user,
     :entity,
     :group,
+    :api,
+    :privileges,
     :http_request,
     :src_endpoint,
     :dst_endpoint,
@@ -133,6 +140,8 @@ defmodule OCSF.Event do
       user: cast_if(get_attr(attrs, :user), OCSF.User),
       entity: cast_if(get_attr(attrs, :entity), OCSF.Entity),
       group: cast_if(get_attr(attrs, :group), OCSF.Group),
+      api: cast_if(get_attr(attrs, :api), OCSF.Api),
+      privileges: get_attr(attrs, :privileges),
       http_request: cast_if(get_attr(attrs, :http_request), OCSF.HttpRequest),
       src_endpoint: cast_if(get_attr(attrs, :src_endpoint), OCSF.NetworkEndpoint),
       dst_endpoint: cast_if(get_attr(attrs, :dst_endpoint), OCSF.NetworkEndpoint),
@@ -211,23 +220,22 @@ defmodule OCSF.Event do
         {key, val}
       end
 
-    # Handle nested org in User
-    casted =
-      if mod == OCSF.User and is_map(casted[:org]) and
-           not is_struct(casted[:org], OCSF.Organization) do
-        Map.put(casted, :org, cast_if(casted[:org], OCSF.Organization))
-      else
-        casted
-      end
+    struct(mod, cast_nested(mod, casted))
+  end
 
-    # Handle nested user in Actor
-    casted =
-      if mod == OCSF.Actor and is_map(casted[:user]) and not is_struct(casted[:user], OCSF.User) do
-        Map.put(casted, :user, cast_if(casted[:user], OCSF.User))
-      else
-        casted
-      end
+  # Recursively cast the single nested object each parent struct carries.
+  defp cast_nested(OCSF.User, casted), do: maybe_cast(casted, :org, OCSF.Organization)
+  defp cast_nested(OCSF.Actor, casted), do: maybe_cast(casted, :user, OCSF.User)
+  defp cast_nested(OCSF.Api, casted), do: maybe_cast(casted, :service, OCSF.Service)
+  defp cast_nested(_mod, casted), do: casted
 
-    struct(mod, casted)
+  defp maybe_cast(casted, key, mod) do
+    val = casted[key]
+
+    if is_map(val) and not is_struct(val, mod) do
+      Map.put(casted, key, cast_if(val, mod))
+    else
+      casted
+    end
   end
 end

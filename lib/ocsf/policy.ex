@@ -53,6 +53,7 @@ defmodule OCSF.Policy do
       | user: redact_struct(policy, event.user),
         entity: redact_struct(policy, event.entity),
         group: redact_struct(policy, event.group),
+        api: redact_struct(policy, event.api),
         actor: redact_actor(policy, event.actor),
         http_request: redact_struct(policy, event.http_request),
         src_endpoint: redact_struct(policy, event.src_endpoint),

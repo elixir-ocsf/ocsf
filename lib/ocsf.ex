@@ -165,9 +165,41 @@ defmodule OCSF do
 
   defp check_time(_), do: {:error, OCSF.Error.new(:missing, "time")}
 
+  defp check_class_required_fields(%{class_uid: 3001, user: nil}),
+    do:
+      {:error, OCSF.Error.new(:missing, "user", %{reason: "required for Account Change (3001)"})}
+
   defp check_class_required_fields(%{class_uid: 3002, user: nil}),
     do:
       {:error, OCSF.Error.new(:missing, "user", %{reason: "required for Authentication (3002)"})}
+
+  defp check_class_required_fields(%{class_uid: 3003, user: nil}),
+    do:
+      {:error,
+       OCSF.Error.new(:missing, "user", %{reason: "required for Authorize Session (3003)"})}
+
+  defp check_class_required_fields(%{class_uid: 3005, user: nil}),
+    do:
+      {:error,
+       OCSF.Error.new(:missing, "user", %{reason: "required for User Access Management (3005)"})}
+
+  defp check_class_required_fields(%{class_uid: 3005, privileges: p}) when p in [nil, []],
+    do:
+      {:error,
+       OCSF.Error.new(:missing, "privileges", %{
+         reason: "required for User Access Management (3005)"
+       })}
+
+  defp check_class_required_fields(%{class_uid: 6003, api: nil}),
+    do: {:error, OCSF.Error.new(:missing, "api", %{reason: "required for API Activity (6003)"})}
+
+  defp check_class_required_fields(%{class_uid: 6003, actor: nil}),
+    do: {:error, OCSF.Error.new(:missing, "actor", %{reason: "required for API Activity (6003)"})}
+
+  defp check_class_required_fields(%{class_uid: 6003, src_endpoint: nil}),
+    do:
+      {:error,
+       OCSF.Error.new(:missing, "src_endpoint", %{reason: "required for API Activity (6003)"})}
 
   defp check_class_required_fields(%{class_uid: 3004, entity: nil}),
     do:

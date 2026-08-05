@@ -57,6 +57,12 @@ defmodule OCSF.Activity do
     3003 => [
       {:Unknown, 0},
       {:"Assign Privileges", 1},
+      {:"Assign Groups", 2},
+      {:Other, 99}
+    ],
+    3005 => [
+      {:Unknown, 0},
+      {:"Assign Privileges", 1},
       {:"Revoke Privileges", 2},
       {:Other, 99}
     ],
@@ -107,7 +113,7 @@ defmodule OCSF.Activity do
   ## Examples
 
       iex> OCSF.Activity.values(3003)
-      [{:Unknown, 0}, {:"Assign Privileges", 1}, {:"Revoke Privileges", 2}, {:Other, 99}]
+      [{:Unknown, 0}, {:"Assign Privileges", 1}, {:"Assign Groups", 2}, {:Other, 99}]
 
       iex> OCSF.Activity.values(9999)
       []

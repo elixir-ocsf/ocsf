@@ -8,7 +8,8 @@ defmodule OCSF.ClassTest do
       values = Class.values()
       assert {:Authentication, 3002} in values
       assert {:"Account Change", 3001} in values
-      assert {:Authorization, 3003} in values
+      assert {:"Authorize Session", 3003} in values
+      assert {:"User Access Management", 3005} in values
       assert {:"API Activity", 6003} in values
     end
   end
@@ -32,6 +33,7 @@ defmodule OCSF.ClassTest do
       assert Class.category(3001) == 3
       assert Class.category(3002) == 3
       assert Class.category(3003) == 3
+      assert Class.category(3005) == 3
       assert Class.category(6003) == 6
       assert Class.category(9999) == nil
     end

@@ -40,6 +40,8 @@ defmodule OCSF.Serializer do
     |> put_not_nil(:user, serialize_user(event.user))
     |> put_not_nil(:entity, serialize_entity(event.entity))
     |> put_not_nil(:group, serialize_group(event.group))
+    |> put_not_nil(:api, serialize_api(event.api))
+    |> put_privileges(event.privileges)
     |> put_not_nil(:http_request, serialize_http_request(event.http_request))
     |> put_not_nil(:src_endpoint, serialize_endpoint(event.src_endpoint))
     |> put_not_nil(:dst_endpoint, serialize_endpoint(event.dst_endpoint))
@@ -122,6 +124,15 @@ defmodule OCSF.Serializer do
     |> put_not_nil(:desc, g.desc)
   end
 
+  defp serialize_api(nil), do: nil
+
+  defp serialize_api(%OCSF.Api{} = a) do
+    %{}
+    |> put_not_nil(:operation, a.operation)
+    |> put_not_nil(:version, a.version)
+    |> put_not_nil(:service, serialize_service(a.service))
+  end
+
   defp serialize_actor(nil), do: nil
 
   defp serialize_actor(%OCSF.Actor{} = a) do
@@ -172,6 +183,10 @@ defmodule OCSF.Serializer do
 
   defp put_not_empty_list(map, _key, []), do: map
   defp put_not_empty_list(map, key, list), do: Map.put(map, key, list)
+
+  defp put_privileges(map, nil), do: map
+  defp put_privileges(map, []), do: map
+  defp put_privileges(map, list) when is_list(list), do: Map.put(map, :privileges, list)
 
   defp put_name(map, _key, nil), do: map
   defp put_name(map, key, name), do: Map.put(map, key, Atom.to_string(name))
