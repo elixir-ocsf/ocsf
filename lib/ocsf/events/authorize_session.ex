@@ -3,7 +3,7 @@ defmodule OCSF.Events.AuthorizeSession do
   Builder for OCSF Authorize Session events (class 3003).
 
   Corresponds to the OCSF
-  [Authorize Session](https://schema.ocsf.io/1.8.0/classes/authorize_session)
+  [Authorize Session](https://schema.ocsf.io/1.9.0/classes/authorize_session)
   class under the Identity & Access Management category (UID 3). Used to
   record privileges and groups assigned to a newly established user
   session (e.g. right after logon).
@@ -14,14 +14,12 @@ defmodule OCSF.Events.AuthorizeSession do
   |----------------------|-------------|-------------------|
   | `assign_privileges/1`| 1           | Assign Privileges |
   | `assign_groups/1`    | 2           | Assign Groups     |
+  | `assign_roles/1`     | 3           | Assign Roles      |
 
   > **OCSF compliance note:** `user` is a required field for the
   > Authorize Session class. Builders return `{:error, _}` if omitted.
-  > OCSF marks `privileges` and `group` as recommended with a `just_one`
-  > constraint; pass the one relevant to the activity.
-
-  Pass an optional `:iam_role` (an `%OCSF.IamRole{}` or plain map) to
-  record the role materialised into the authorized session.
+  > OCSF also requires at least one of `privileges`, `groups`, or
+  > `iam_roles`; pass the one relevant to the activity.
 
   See `OCSF.User`, `OCSF.Group`, `OCSF.IamRole`, `OCSF.Event`,
   `OCSF.Activity`.
@@ -56,10 +54,20 @@ defmodule OCSF.Events.AuthorizeSession do
   @doc """
   Build an Assign Groups event (activity_id 2).
 
-  Pass `:group` for the group whose membership grants access.
+  Pass `:groups` (a list of `%OCSF.Group{}` or plain maps) for the
+  groups whose membership grants access.
   """
   @spec assign_groups(keyword) :: {:ok, OCSF.Event.t()} | {:error, OCSF.Error.t()}
   def assign_groups(opts), do: build(2, opts)
+
+  @doc """
+  Build an Assign Roles event (activity_id 3).
+
+  Pass `:iam_roles` (a list of `%OCSF.IamRole{}` or plain maps) for the
+  roles materialised into the authorized session.
+  """
+  @spec assign_roles(keyword) :: {:ok, OCSF.Event.t()} | {:error, OCSF.Error.t()}
+  def assign_roles(opts), do: build(3, opts)
 
   # -- Internal builder --
 
@@ -84,7 +92,8 @@ defmodule OCSF.Events.AuthorizeSession do
       status_detail: opts[:status_detail],
       user: opts[:user],
       group: opts[:group],
-      iam_role: opts[:iam_role],
+      groups: opts[:groups],
+      iam_roles: opts[:iam_roles],
       privileges: opts[:privileges],
       actor: opts[:actor],
       http_request: opts[:http_request],

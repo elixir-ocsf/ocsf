@@ -3,6 +3,9 @@ defmodule OCSF.Events.UserManagementTest do
 
   alias OCSF.{Actor, Error, IamRole, Policy, Product, Service, User}
   alias OCSF.Events.UserManagement
+  alias OCSF.Test.SchemaValidator
+
+  @schema SchemaValidator.load_class_schema("user_management")
 
   @activities [
     create: 1,
@@ -111,7 +114,7 @@ defmodule OCSF.Events.UserManagementTest do
 
     test "auto-generates metadata.uid and stamps version" do
       assert {:ok, event} = UserManagement.create(base_opts())
-      assert event.metadata.version == "1.8.0"
+      assert event.metadata.version == "1.9.0"
       assert byte_size(event.metadata.uid) > 0
     end
 
@@ -133,6 +136,45 @@ defmodule OCSF.Events.UserManagementTest do
       assert event.actor.user.uid == "admin-1"
       assert event.service.name == "idp"
       assert event.status_detail == "admin_initiated"
+    end
+  end
+
+  describe "OCSF schema conformance" do
+    for {fun, activity} <- @activities do
+      test "#{fun} event passes schema validation" do
+        {:ok, event} = UserManagement.unquote(fun)(user: %{uid: "u1"})
+        event_map = OCSF.to_map(event)
+        assert {:ok, []} = SchemaValidator.validate_event(event_map, @schema)
+        assert event.activity_id == unquote(activity)
+      end
+    end
+
+    test "schema marks user as a required field" do
+      assert "user" in SchemaValidator.required_fields(@schema)
+    end
+
+    test "activity_id values match OCSF.Activity for class 3007" do
+      schema_values = SchemaValidator.enum_values(@schema, "activity_id")
+      ours = OCSF.Activity.values(3007) |> Enum.map(fn {_n, id} -> id end) |> MapSet.new()
+      assert MapSet.equal?(schema_values, ours)
+    end
+
+    test "type_uid values match class_uid * 100 + activity_id" do
+      schema_type_uids = SchemaValidator.enum_values(@schema, "type_uid")
+
+      expected =
+        OCSF.Activity.values(3007) |> Enum.map(fn {_n, id} -> 3007 * 100 + id end) |> MapSet.new()
+
+      assert MapSet.equal?(schema_type_uids, expected)
+    end
+
+    test "activity captions match our atom labels" do
+      for {id_str, def} <- @schema["attributes"]["activity_id"]["enum"] do
+        id = String.to_integer(id_str)
+        label = OCSF.Activity.label(3007, id)
+        assert label != nil, "missing activity_id #{id} in OCSF.Activity"
+        assert Atom.to_string(label) == def["caption"]
+      end
     end
   end
 
@@ -175,6 +217,30 @@ defmodule OCSF.Events.UserManagementTest do
       assert redacted.user.name == nil
       assert redacted.user.email_addr == nil
       assert redacted.user.uid == "u1"
+    end
+
+    test "deny policy nils PII fields on the updated_user" do
+      {:ok, event} =
+        UserManagement.update(
+          user: %{uid: "u1"},
+          updated_user: %{uid: "u1", name: "Jane R.", email_addr: "jane@test.com"}
+        )
+
+      redacted = OCSF.redact(event, %Policy{deny: [:identity, :contact]})
+      assert redacted.updated_user.name == nil
+      assert redacted.updated_user.email_addr == nil
+      assert redacted.updated_user.uid == "u1"
+    end
+
+    test "programmatic_credentials on iam_roles are always dropped" do
+      {:ok, event} =
+        UserManagement.assign_roles(
+          user: %{uid: "u1"},
+          iam_roles: [%{name: "admin", uid: "role-1", programmatic_credentials: ["AKIA123"]}]
+        )
+
+      redacted = OCSF.redact(event, %Policy{})
+      assert [%IamRole{programmatic_credentials: nil, uid: "role-1"}] = redacted.iam_roles
     end
   end
 

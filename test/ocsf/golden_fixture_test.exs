@@ -3,7 +3,7 @@ defmodule OCSF.GoldenFixtureTest do
 
   alias OCSF.Events.Authentication
 
-  @fixtures_dir "test/fixtures/ocsf/1.8/authentication"
+  @fixtures_dir "test/fixtures/ocsf/1.9/authentication"
 
   defp load_fixture(filename) do
     Path.join(@fixtures_dir, filename)

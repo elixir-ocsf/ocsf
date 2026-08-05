@@ -1,8 +1,11 @@
 defmodule OCSF.Events.RoleManagementTest do
   use ExUnit.Case, async: true
 
-  alias OCSF.{Actor, Error, IamRole, Product, Service, User}
+  alias OCSF.{Actor, Error, IamRole, Policy, Product, Service, User}
   alias OCSF.Events.RoleManagement
+  alias OCSF.Test.SchemaValidator
+
+  @schema SchemaValidator.load_class_schema("role_management")
 
   @activities [
     create: 1,
@@ -106,6 +109,45 @@ defmodule OCSF.Events.RoleManagementTest do
     end
   end
 
+  describe "OCSF schema conformance" do
+    for {fun, activity} <- @activities do
+      test "#{fun} event passes schema validation" do
+        {:ok, event} = RoleManagement.unquote(fun)(iam_role: %{name: "admin", uid: "role-1"})
+        event_map = OCSF.to_map(event)
+        assert {:ok, []} = SchemaValidator.validate_event(event_map, @schema)
+        assert event.activity_id == unquote(activity)
+      end
+    end
+
+    test "schema marks iam_role as a required field" do
+      assert "iam_role" in SchemaValidator.required_fields(@schema)
+    end
+
+    test "activity_id values match OCSF.Activity for class 3008" do
+      schema_values = SchemaValidator.enum_values(@schema, "activity_id")
+      ours = OCSF.Activity.values(3008) |> Enum.map(fn {_n, id} -> id end) |> MapSet.new()
+      assert MapSet.equal?(schema_values, ours)
+    end
+
+    test "type_uid values match class_uid * 100 + activity_id" do
+      schema_type_uids = SchemaValidator.enum_values(@schema, "type_uid")
+
+      expected =
+        OCSF.Activity.values(3008) |> Enum.map(fn {_n, id} -> 3008 * 100 + id end) |> MapSet.new()
+
+      assert MapSet.equal?(schema_type_uids, expected)
+    end
+
+    test "activity captions match our atom labels" do
+      for {id_str, def} <- @schema["attributes"]["activity_id"]["enum"] do
+        id = String.to_integer(id_str)
+        label = OCSF.Activity.label(3008, id)
+        assert label != nil, "missing activity_id #{id} in OCSF.Activity"
+        assert Atom.to_string(label) == def["caption"]
+      end
+    end
+  end
+
   describe "serialization round-trip" do
     test "to_map/from_map preserves iam_role, updated_role, privileges, resources" do
       {:ok, event} =
@@ -138,6 +180,30 @@ defmodule OCSF.Events.RoleManagementTest do
       assert map[:class_name] == "Role Management"
       assert map[:activity_name] == "Create"
       assert map[:iam_role][:name] == "admin"
+    end
+  end
+
+  describe "redaction" do
+    test "programmatic_credentials on iam_role and updated_role are always dropped" do
+      {:ok, event} =
+        RoleManagement.add_programmatic_credentials(
+          iam_role: %{name: "admin", uid: "role-1", programmatic_credentials: ["AKIA123"]},
+          updated_role: %{name: "admin", uid: "role-1", programmatic_credentials: ["AKIA456"]}
+        )
+
+      redacted = OCSF.redact(event, %Policy{})
+      assert redacted.iam_role.programmatic_credentials == nil
+      assert redacted.updated_role.programmatic_credentials == nil
+      assert redacted.iam_role.uid == "role-1"
+    end
+
+    test "deny policy nils PII fields on the actor user but keeps the role" do
+      opts = Keyword.put(base_opts(), :actor, %{user: %{uid: "a1", email_addr: "admin@test.com"}})
+      {:ok, event} = RoleManagement.create(opts)
+
+      redacted = OCSF.redact(event, %Policy{deny: [:contact]})
+      assert redacted.actor.user.email_addr == nil
+      assert redacted.iam_role.name == "admin"
     end
   end
 

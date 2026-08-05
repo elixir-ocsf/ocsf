@@ -3,7 +3,7 @@ defmodule OCSF.Events.ApiActivity do
   Builder for OCSF API Activity events (class 6003).
 
   Corresponds to the OCSF
-  [API Activity](https://schema.ocsf.io/1.8.0/classes/api_activity)
+  [API Activity](https://schema.ocsf.io/1.9.0/classes/api_activity)
   class under the Application Activity category (UID 6). Used to audit
   management-plane / programmatic API calls -- the CRUD operations a
   caller performs against a service's API.

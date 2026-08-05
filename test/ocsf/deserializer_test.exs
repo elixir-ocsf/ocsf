@@ -9,7 +9,7 @@ defmodule OCSF.DeserializerTest do
       |> Keyword.merge(
         metadata: %OCSF.Metadata{
           uid: "test-uid",
-          version: "1.8.0",
+          version: "1.9.0",
           product: %OCSF.Product{name: "Test"}
         },
         time: ~U[2026-04-15 10:00:00Z],
@@ -170,7 +170,7 @@ defmodule OCSF.DeserializerTest do
         valid_event()
         | metadata: %OCSF.Metadata{
             uid: "test-uid",
-            version: "1.8.0",
+            version: "1.9.0",
             product: %OCSF.Product{
               name: "TestProduct",
               vendor_name: "Vendor",
@@ -195,7 +195,7 @@ defmodule OCSF.DeserializerTest do
         valid_event()
         | metadata: %OCSF.Metadata{
             uid: "test-uid",
-            version: "1.8.0",
+            version: "1.9.0",
             product: %OCSF.Product{name: "Test"},
             profiles: ["host"],
             event_code: "auth:logon",
@@ -307,7 +307,7 @@ defmodule OCSF.DeserializerTest do
         |> Map.delete(:metadata)
         |> Map.put(:metadata, %{
           uid: "test-uid",
-          version: "1.8.0",
+          version: "1.9.0",
           product: nil,
           profiles: []
         })

@@ -82,7 +82,7 @@ defmodule OCSF.Events.EntityManagementTest do
 
     test "auto-generates metadata.uid and stamps version" do
       assert {:ok, event} = EntityManagement.create(base_opts())
-      assert event.metadata.version == "1.8.0"
+      assert event.metadata.version == "1.9.0"
       assert byte_size(event.metadata.uid) > 0
     end
 
@@ -217,7 +217,7 @@ defmodule OCSF.Events.EntityManagementTest do
         })
 
       assert {:ok, event} = EntityManagement.create(opts)
-      assert event.metadata.version == "1.8.0"
+      assert event.metadata.version == "1.9.0"
       assert event.metadata.trace_uid == "t-1"
     end
 

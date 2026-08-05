@@ -3,7 +3,7 @@ defmodule OCSF.Event do
   OCSF event struct.
 
   Represents a single OCSF-compliant security event. Mirrors the
-  [OCSF 1.8 base event](https://schema.ocsf.io/1.8.0/base_event) with
+  [OCSF 1.9 base event](https://schema.ocsf.io/1.9.0/base_event) with
   nested object structs for `metadata`, `user`, `http_request`, etc.
 
   Use per-class builders (`OCSF.Events.Authentication`) rather than
@@ -28,9 +28,11 @@ defmodule OCSF.Event do
     Management (3007) change, when distinct from the acting `user`.
   - `:entity` — `%OCSF.Entity{} | nil`. Required for Entity Management (3004).
   - `:group` — `%OCSF.Group{} | nil`. Required for Group Management (3006).
+  - `:groups` — `[OCSF.Group.t()] | nil`. Groups assigned to the session
+    in an Authorize Session (3003) event.
   - `:iam_role` — `%OCSF.IamRole{} | nil`. Required for Role Management (3008).
   - `:iam_roles` — `[OCSF.IamRole.t()] | nil`. Roles assigned/removed in a
-    User Management (3007) event.
+    User Management (3007) or Authorize Session (3003) event.
   - `:updated_role` — `%OCSF.IamRole{} | nil`. Target role after a Role
     Management (3008) change, when distinct from `iam_role`.
   - `:api` — `%OCSF.Api{} | nil`. Required for API Activity (6003).
@@ -65,6 +67,7 @@ defmodule OCSF.Event do
           updated_user: OCSF.User.t() | nil,
           entity: OCSF.Entity.t() | nil,
           group: OCSF.Group.t() | nil,
+          groups: [OCSF.Group.t()] | nil,
           iam_role: OCSF.IamRole.t() | nil,
           iam_roles: [OCSF.IamRole.t()] | nil,
           updated_role: OCSF.IamRole.t() | nil,
@@ -95,6 +98,7 @@ defmodule OCSF.Event do
     :updated_user,
     :entity,
     :group,
+    :groups,
     :iam_role,
     :iam_roles,
     :updated_role,
@@ -124,7 +128,7 @@ defmodule OCSF.Event do
       iex> {:ok, event} = OCSF.Event.new(
       ...>   metadata: %OCSF.Metadata{
       ...>     uid: "test-uid",
-      ...>     version: "1.8.0",
+      ...>     version: "1.9.0",
       ...>     product: %OCSF.Product{name: "Test"}
       ...>   },
       ...>   time: ~U[2026-04-15 10:00:00Z],
@@ -160,6 +164,7 @@ defmodule OCSF.Event do
       updated_user: cast_if(get_attr(attrs, :updated_user), OCSF.User),
       entity: cast_if(get_attr(attrs, :entity), OCSF.Entity),
       group: cast_if(get_attr(attrs, :group), OCSF.Group),
+      groups: cast_list_if(get_attr(attrs, :groups), OCSF.Group),
       iam_role: cast_if(get_attr(attrs, :iam_role), OCSF.IamRole),
       iam_roles: cast_list_if(get_attr(attrs, :iam_roles), OCSF.IamRole),
       updated_role: cast_if(get_attr(attrs, :updated_role), OCSF.IamRole),

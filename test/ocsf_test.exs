@@ -9,7 +9,7 @@ defmodule OCSFTest do
       |> Keyword.merge(
         metadata: %OCSF.Metadata{
           uid: "test-uid",
-          version: "1.8.0",
+          version: "1.9.0",
           product: %OCSF.Product{name: "Test"}
         },
         time: ~U[2026-04-15 10:00:00Z],
@@ -21,8 +21,8 @@ defmodule OCSFTest do
   end
 
   describe "version/0" do
-    test "returns OCSF 1.8.0" do
-      assert OCSF.version() == "1.8.0"
+    test "returns OCSF 1.9.0" do
+      assert OCSF.version() == "1.9.0"
     end
   end
 

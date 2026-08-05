@@ -2,12 +2,12 @@ defmodule OCSF.Category do
   @moduledoc """
   OCSF event categories (top-level grouping).
 
-  Maps category names to their OCSF 1.8 numeric identifiers. Categories
+  Maps category names to their OCSF 1.9 numeric identifiers. Categories
   are the broadest classification of events and group related event
   classes together.
 
   See the OCSF
-  [category_uid](https://schema.ocsf.io/1.8.0/categories) definition.
+  [category_uid](https://schema.ocsf.io/1.9.0/categories) definition.
 
   ## Values
 

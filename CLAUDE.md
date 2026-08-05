@@ -3,7 +3,7 @@
 ## Project overview
 
 Elixir library implementing the Open Cybersecurity Schema Framework
-(OCSF 1.8). Persistence-agnostic core with optional `ocsf_ecto`
+(OCSF 1.9). Persistence-agnostic core with optional `ocsf_ecto`
 (Postgres) and `ocsf_clickhouse` (ClickHouse) companion libs.
 
 ## Before starting any task

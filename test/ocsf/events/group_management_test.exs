@@ -84,7 +84,7 @@ defmodule OCSF.Events.GroupManagementTest do
 
     test "auto-generates metadata.uid and stamps version" do
       assert {:ok, event} = GroupManagement.create(base_opts())
-      assert event.metadata.version == "1.8.0"
+      assert event.metadata.version == "1.9.0"
       assert byte_size(event.metadata.uid) > 0
     end
 
@@ -109,7 +109,7 @@ defmodule OCSF.Events.GroupManagementTest do
         |> Keyword.put(:unmapped, %{"k" => "v"})
 
       assert {:ok, event} = GroupManagement.create(opts)
-      assert event.metadata.version == "1.8.0"
+      assert event.metadata.version == "1.9.0"
       assert event.metadata.trace_uid == "t-1"
       assert event.metadata.span_uid == "s-1"
       assert event.metadata.event_code == "gm:create"

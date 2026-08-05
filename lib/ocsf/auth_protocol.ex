@@ -2,12 +2,12 @@ defmodule OCSF.AuthProtocol do
   @moduledoc """
   OCSF authentication protocol identifiers.
 
-  Maps authentication protocol names to their OCSF 1.8 numeric
+  Maps authentication protocol names to their OCSF 1.9 numeric
   identifiers. Used to populate the `auth_protocol_id` field on
   Authentication events.
 
   See the OCSF
-  [auth_protocol_id](https://schema.ocsf.io/1.8.0/objects/authentication?caption=auth_protocol_id)
+  [auth_protocol_id](https://schema.ocsf.io/1.9.0/objects/authentication?caption=auth_protocol_id)
   definition.
 
   ## Values

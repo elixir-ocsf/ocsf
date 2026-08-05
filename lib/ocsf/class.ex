@@ -2,12 +2,12 @@ defmodule OCSF.Class do
   @moduledoc """
   OCSF event classes.
 
-  Maps event class names to their OCSF 1.8 numeric identifiers. Each
+  Maps event class names to their OCSF 1.9 numeric identifiers. Each
   class belongs to a `OCSF.Category` and defines the schema for a
   specific type of security event.
 
   See the OCSF
-  [classes](https://schema.ocsf.io/1.8.0/classes) definition.
+  [classes](https://schema.ocsf.io/1.9.0/classes) definition.
 
   ## Values
 

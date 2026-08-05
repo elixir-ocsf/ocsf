@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
-Elixir library modelling the [Open Cybersecurity Schema Framework (OCSF 1.8)](https://schema.ocsf.io/1.8.0/).
+Elixir library modelling the [Open Cybersecurity Schema Framework (OCSF 1.9)](https://schema.ocsf.io/1.9.0/).
 
 Build, validate, and serialize security events that are OCSF-compliant
 out of the box. Persistence-agnostic core with optional companion
@@ -44,7 +44,7 @@ When published to hex.pm:
 
 ```elixir
 OCSF.version()
-#=> "1.8.0"
+#=> "1.9.0"
 ```
 
 ### Explore enums
@@ -178,15 +178,15 @@ Write             Project to flat columns, bulk-insert via sink adapter
 
 | Struct                 | OCSF object                                                                                   |
 |------------------------|-----------------------------------------------------------------------------------------------|
-| `OCSF.Metadata`       | [Metadata](https://schema.ocsf.io/1.8.0/objects/metadata)                                     |
-| `OCSF.User`           | [User](https://schema.ocsf.io/1.8.0/objects/user)                                             |
-| `OCSF.Organization`   | [Organization](https://schema.ocsf.io/1.8.0/objects/organization)                             |
-| `OCSF.Product`        | [Product](https://schema.ocsf.io/1.8.0/objects/product)                                       |
-| `OCSF.Feature`        | [Feature](https://schema.ocsf.io/1.8.0/objects/feature)                                       |
-| `OCSF.HttpRequest`    | [HTTP Request](https://schema.ocsf.io/1.8.0/objects/http_request)                             |
-| `OCSF.NetworkEndpoint`| [Network Endpoint](https://schema.ocsf.io/1.8.0/objects/network_endpoint)                     |
-| `OCSF.Actor`          | [Actor](https://schema.ocsf.io/1.8.0/objects/actor)                                           |
-| `OCSF.Service`        | [Service](https://schema.ocsf.io/1.8.0/objects/service)                                       |
+| `OCSF.Metadata`       | [Metadata](https://schema.ocsf.io/1.9.0/objects/metadata)                                     |
+| `OCSF.User`           | [User](https://schema.ocsf.io/1.9.0/objects/user)                                             |
+| `OCSF.Organization`   | [Organization](https://schema.ocsf.io/1.9.0/objects/organization)                             |
+| `OCSF.Product`        | [Product](https://schema.ocsf.io/1.9.0/objects/product)                                       |
+| `OCSF.Feature`        | [Feature](https://schema.ocsf.io/1.9.0/objects/feature)                                       |
+| `OCSF.HttpRequest`    | [HTTP Request](https://schema.ocsf.io/1.9.0/objects/http_request)                             |
+| `OCSF.NetworkEndpoint`| [Network Endpoint](https://schema.ocsf.io/1.9.0/objects/network_endpoint)                     |
+| `OCSF.Actor`          | [Actor](https://schema.ocsf.io/1.9.0/objects/actor)                                           |
+| `OCSF.Service`        | [Service](https://schema.ocsf.io/1.9.0/objects/service)                                       |
 
 Every struct exposes `__ocsf_fields__/0` for PII classification metadata.
 
@@ -222,7 +222,7 @@ See `OCSF.Classification` for the full taxonomy.
 
 One library release targets one OCSF version:
 
-- `ocsf 0.x.y` targets OCSF 1.8
+- `ocsf 0.x.y` targets OCSF 1.9
 - `ocsf 1.x.y` will target OCSF 1.9 when it ships
 
 `OCSF.version/0` returns the pinned version. Every emitted event carries
@@ -274,7 +274,7 @@ verbatim.
 
 ## Links
 
-- [OCSF 1.8 Schema](https://schema.ocsf.io/1.8.0/)
+- [OCSF 1.9 Schema](https://schema.ocsf.io/1.9.0/)
 - [OCSF GitHub](https://github.com/ocsf)
 - [ecto_ch](https://hex.pm/packages/ecto_ch) -- ClickHouse Ecto adapter
 - [uuid_v7](https://hex.pm/packages/uuid_v7) -- UUIDv7 generation

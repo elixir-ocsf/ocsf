@@ -41,6 +41,7 @@ defmodule OCSF.Serializer do
     |> put_not_nil(:updated_user, serialize_user(event.updated_user))
     |> put_not_nil(:entity, serialize_entity(event.entity))
     |> put_not_nil(:group, serialize_group(event.group))
+    |> put_groups(event.groups)
     |> put_not_nil(:iam_role, serialize_iam_role(event.iam_role))
     |> put_iam_roles(event.iam_roles)
     |> put_not_nil(:updated_role, serialize_iam_role(event.updated_role))
@@ -212,6 +213,12 @@ defmodule OCSF.Serializer do
   defp put_resources(map, nil), do: map
   defp put_resources(map, []), do: map
   defp put_resources(map, list) when is_list(list), do: Map.put(map, :resources, list)
+
+  defp put_groups(map, nil), do: map
+  defp put_groups(map, []), do: map
+
+  defp put_groups(map, list) when is_list(list),
+    do: Map.put(map, :groups, Enum.map(list, &serialize_group/1))
 
   defp put_iam_roles(map, nil), do: map
   defp put_iam_roles(map, []), do: map

@@ -7,7 +7,7 @@ defmodule OCSF.Api do
   `operation` and the `service` that exposes it.
 
   Corresponds to the OCSF
-  [API](https://schema.ocsf.io/1.8.0/objects/api) object. Carried in
+  [API](https://schema.ocsf.io/1.9.0/objects/api) object. Carried in
   `OCSF.Event`'s `:api` field, which is required for the API Activity
   class.
 

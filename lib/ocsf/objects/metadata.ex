@@ -7,12 +7,12 @@ defmodule OCSF.Metadata do
   `%OCSF.Metadata{}` struct.
 
   Corresponds to the OCSF
-  [Metadata](https://schema.ocsf.io/1.8.0/objects/metadata) object.
+  [Metadata](https://schema.ocsf.io/1.9.0/objects/metadata) object.
 
   ## Fields
 
   - `:uid` -- unique event identifier. Classified as `:identifier`.
-  - `:version` -- OCSF schema version (e.g. `"1.8.0"`). Classified as `:taxonomic`.
+  - `:version` -- OCSF schema version (e.g. `"1.9.0"`). Classified as `:taxonomic`.
   - `:product` -- `%OCSF.Product{}` describing the reporting product. Classified as `:taxonomic`.
   - `:profiles` -- list of OCSF profile strings applied to the event. Classified as `:taxonomic`.
   - `:event_code` -- optional application-specific event code. Classified as `:taxonomic`.

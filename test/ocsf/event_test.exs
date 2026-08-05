@@ -78,7 +78,7 @@ defmodule OCSF.EventTest do
     test "cast_metadata passes through already-struct OCSF.Metadata" do
       meta = %OCSF.Metadata{
         uid: "m1",
-        version: "1.8.0",
+        version: "1.9.0",
         product: %OCSF.Product{name: "Test"}
       }
 
@@ -93,7 +93,7 @@ defmodule OCSF.EventTest do
       attrs =
         Keyword.put(valid_attrs(), :metadata, %{
           uid: "m1",
-          version: "1.8.0",
+          version: "1.9.0",
           product: product
         })
 
@@ -107,7 +107,7 @@ defmodule OCSF.EventTest do
       attrs =
         Keyword.put(valid_attrs(), :metadata, %{
           uid: "m1",
-          version: "1.8.0",
+          version: "1.9.0",
           product: %{name: "Test", feature: feature}
         })
 
@@ -119,7 +119,7 @@ defmodule OCSF.EventTest do
       attrs =
         Keyword.put(valid_attrs(), :metadata, %{
           uid: "m1",
-          version: "1.8.0",
+          version: "1.9.0",
           product: nil
         })
 
@@ -131,7 +131,7 @@ defmodule OCSF.EventTest do
       attrs =
         Keyword.put(valid_attrs(), :metadata, %{
           uid: "m1",
-          version: "1.8.0",
+          version: "1.9.0",
           product: %{name: "Test", feature: nil}
         })
 
@@ -162,7 +162,7 @@ defmodule OCSF.EventTest do
       attrs = %{
         "metadata" => %{
           "uid" => "test-uid",
-          "version" => "1.8.0",
+          "version" => "1.9.0",
           "product" => %{"name" => "Test"}
         },
         "time" => ~U[2026-04-15 10:00:00Z],
@@ -186,7 +186,7 @@ defmodule OCSF.EventTest do
       attrs = %{
         "metadata" => %{
           "uid" => "test-uid",
-          "version" => "1.8.0",
+          "version" => "1.9.0",
           "product" => %{
             "name" => "Test",
             "feature" => %{"name" => "Login", "uid" => "f1", "version" => "1.0"},
@@ -220,7 +220,7 @@ defmodule OCSF.EventTest do
       attrs = %{
         "metadata" => %{
           "uid" => "test-uid",
-          "version" => "1.8.0",
+          "version" => "1.9.0",
           "product" => %{"name" => "Test"}
         },
         "time" => ~U[2026-04-15 10:00:00Z],

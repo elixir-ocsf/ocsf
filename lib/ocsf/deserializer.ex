@@ -34,6 +34,7 @@ defmodule OCSF.Deserializer do
       updated_user: parse_if(get(map, :updated_user), &parse_user/1),
       entity: parse_if(get(map, :entity), &parse_entity/1),
       group: parse_if(get(map, :group), &parse_group/1),
+      groups: parse_list_if(get(map, :groups), &parse_group/1),
       iam_role: parse_if(get(map, :iam_role), &parse_iam_role/1),
       iam_roles: parse_list_if(get(map, :iam_roles), &parse_iam_role/1),
       updated_role: parse_if(get(map, :updated_role), &parse_iam_role/1),

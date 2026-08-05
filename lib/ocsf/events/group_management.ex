@@ -3,7 +3,7 @@ defmodule OCSF.Events.GroupManagement do
   Builder for OCSF Group Management events (class 3006).
 
   Corresponds to the OCSF
-  [Group Management](https://schema.ocsf.io/1.8.0/classes/group_management)
+  [Group Management](https://schema.ocsf.io/1.9.0/classes/group_management)
   class under the Identity & Access Management category (UID 3). Used to
   audit group lifecycle and membership changes -- create, delete, and
   add/remove user.

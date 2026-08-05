@@ -2,12 +2,12 @@ defmodule OCSF.Activity do
   @moduledoc """
   OCSF per-class activity mappings.
 
-  Maps activity names to their OCSF 1.8 numeric identifiers within each
+  Maps activity names to their OCSF 1.9 numeric identifiers within each
   event class. Activities describe *what* happened in a given event class
   (e.g. Logon, Logoff for Authentication).
 
   See the OCSF
-  [activity_id](https://schema.ocsf.io/1.8.0/data_types/integer?caption=activity_id)
+  [activity_id](https://schema.ocsf.io/1.9.0/data_types/integer?caption=activity_id)
   definition.
 
   ## Activities by class
@@ -43,6 +43,7 @@ defmodule OCSF.Activity do
       {:Unknown, 0},
       {:"Assign Privileges", 1},
       {:"Assign Groups", 2},
+      {:"Assign Roles", 3},
       {:Other, 99}
     ],
     3007 => [
@@ -110,6 +111,11 @@ defmodule OCSF.Activity do
       {:Create, 6},
       {:"Add Subgroup", 7},
       {:"Remove Subgroup", 8},
+      {:Update, 9},
+      {:"Attach Policies", 10},
+      {:"Detach Policies", 11},
+      {:"Assign Roles", 12},
+      {:"Remove Roles", 13},
       {:Other, 99}
     ],
     6003 => [
@@ -130,7 +136,7 @@ defmodule OCSF.Activity do
   ## Examples
 
       iex> OCSF.Activity.values(3003)
-      [{:Unknown, 0}, {:"Assign Privileges", 1}, {:"Assign Groups", 2}, {:Other, 99}]
+      [{:Unknown, 0}, {:"Assign Privileges", 1}, {:"Assign Groups", 2}, {:"Assign Roles", 3}, {:Other, 99}]
 
       iex> OCSF.Activity.values(9999)
       []

@@ -7,7 +7,14 @@ defmodule OCSF.Events.AuthorizeSessionTest do
 
   @schema SchemaValidator.load_class_schema("authorize_session")
 
-  @activities [assign_privileges: 1, assign_groups: 2]
+  @activities [assign_privileges: 1, assign_groups: 2, assign_roles: 3]
+
+  # Attribute satisfying the OCSF `at_least_one` constraint per activity.
+  @constraint_opts %{
+    assign_privileges: {:privileges, ["read:reports"]},
+    assign_groups: {:groups, [%{uid: "g1", name: "Admins"}]},
+    assign_roles: {:iam_roles, [%{name: "admin", uid: "role-1"}]}
+  }
 
   defp base_opts do
     [
@@ -29,12 +36,20 @@ defmodule OCSF.Events.AuthorizeSessionTest do
       assert event.privileges == ["read:reports"]
     end
 
-    test "assign_groups/1 -> activity 2 carries the group" do
-      opts = Keyword.put(base_opts(), :group, %Group{uid: "g1", name: "Admins"})
+    test "assign_groups/1 -> activity 2 carries the groups" do
+      opts = Keyword.put(base_opts(), :groups, [%Group{uid: "g1", name: "Admins"}])
       assert {:ok, event} = AuthorizeSession.assign_groups(opts)
       assert event.activity_id == 2
       assert event.type_uid == 300_302
-      assert %Group{uid: "g1", name: "Admins"} = event.group
+      assert [%Group{uid: "g1", name: "Admins"}] = event.groups
+    end
+
+    test "assign_roles/1 -> activity 3 carries the iam_roles" do
+      opts = Keyword.put(base_opts(), :iam_roles, [%{name: "admin", uid: "role-1"}])
+      assert {:ok, event} = AuthorizeSession.assign_roles(opts)
+      assert event.activity_id == 3
+      assert event.type_uid == 300_303
+      assert [%IamRole{name: "admin", uid: "role-1"}] = event.iam_roles
     end
   end
 
@@ -73,20 +88,30 @@ defmodule OCSF.Events.AuthorizeSessionTest do
       assert event.actor.user.uid == "admin-1"
     end
 
-    test "casts and carries an optional iam_role, surviving a round-trip" do
-      opts = Keyword.put(base_opts(), :iam_role, %{name: "admin", uid: "role-1"})
-      assert {:ok, event} = AuthorizeSession.assign_privileges(opts)
-      assert %IamRole{name: "admin", uid: "role-1"} = event.iam_role
+    test "casts iam_roles maps to structs, surviving a round-trip" do
+      opts = Keyword.put(base_opts(), :iam_roles, [%{name: "admin", uid: "role-1"}])
+      assert {:ok, event} = AuthorizeSession.assign_roles(opts)
+      assert [%IamRole{name: "admin", uid: "role-1"}] = event.iam_roles
 
       assert {:ok, reparsed} = event |> OCSF.to_map() |> OCSF.from_map()
-      assert reparsed.iam_role == event.iam_role
+      assert reparsed.iam_roles == event.iam_roles
+    end
+
+    test "casts groups maps to structs, surviving a round-trip" do
+      opts = Keyword.put(base_opts(), :groups, [%{uid: "g1", name: "Admins"}])
+      assert {:ok, event} = AuthorizeSession.assign_groups(opts)
+      assert [%Group{uid: "g1", name: "Admins"}] = event.groups
+
+      assert {:ok, reparsed} = event |> OCSF.to_map() |> OCSF.from_map()
+      assert reparsed.groups == event.groups
     end
   end
 
   describe "OCSF schema conformance" do
     for {fun, activity} <- @activities do
       test "#{fun} event passes schema validation" do
-        {:ok, event} = AuthorizeSession.unquote(fun)(user: %{uid: "u1"})
+        {key, value} = @constraint_opts[unquote(fun)]
+        {:ok, event} = AuthorizeSession.unquote(fun)([{:user, %{uid: "u1"}}, {key, value}])
         event_map = OCSF.to_map(event)
         assert {:ok, []} = SchemaValidator.validate_event(event_map, @schema)
         assert event.activity_id == unquote(activity)
