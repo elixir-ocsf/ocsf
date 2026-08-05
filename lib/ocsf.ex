@@ -165,10 +165,6 @@ defmodule OCSF do
 
   defp check_time(_), do: {:error, OCSF.Error.new(:missing, "time")}
 
-  defp check_class_required_fields(%{class_uid: 3001, user: nil}),
-    do:
-      {:error, OCSF.Error.new(:missing, "user", %{reason: "required for Account Change (3001)"})}
-
   defp check_class_required_fields(%{class_uid: 3002, user: nil}),
     do:
       {:error, OCSF.Error.new(:missing, "user", %{reason: "required for Authentication (3002)"})}
@@ -178,17 +174,14 @@ defmodule OCSF do
       {:error,
        OCSF.Error.new(:missing, "user", %{reason: "required for Authorize Session (3003)"})}
 
-  defp check_class_required_fields(%{class_uid: 3005, user: nil}),
+  defp check_class_required_fields(%{class_uid: 3007, user: nil}),
     do:
-      {:error,
-       OCSF.Error.new(:missing, "user", %{reason: "required for User Access Management (3005)"})}
+      {:error, OCSF.Error.new(:missing, "user", %{reason: "required for User Management (3007)"})}
 
-  defp check_class_required_fields(%{class_uid: 3005, privileges: p}) when p in [nil, []],
+  defp check_class_required_fields(%{class_uid: 3008, iam_role: nil}),
     do:
       {:error,
-       OCSF.Error.new(:missing, "privileges", %{
-         reason: "required for User Access Management (3005)"
-       })}
+       OCSF.Error.new(:missing, "iam_role", %{reason: "required for Role Management (3008)"})}
 
   defp check_class_required_fields(%{class_uid: 6003, api: nil}),
     do: {:error, OCSF.Error.new(:missing, "api", %{reason: "required for API Activity (6003)"})}

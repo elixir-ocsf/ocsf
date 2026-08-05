@@ -23,12 +23,21 @@ defmodule OCSF.Event do
   - `:status_id` — integer. Event status.
   - `:status_detail` — `String.t() | nil`. Free-form detail.
   - `:auth_protocol_id` — `integer | nil`. Auth protocol.
-  - `:user` — `%OCSF.User{} | nil`.
+  - `:user` — `%OCSF.User{} | nil`. Required for User Management (3007).
+  - `:updated_user` — `%OCSF.User{} | nil`. Target user after a User
+    Management (3007) change, when distinct from the acting `user`.
   - `:entity` — `%OCSF.Entity{} | nil`. Required for Entity Management (3004).
   - `:group` — `%OCSF.Group{} | nil`. Required for Group Management (3006).
+  - `:iam_role` — `%OCSF.IamRole{} | nil`. Required for Role Management (3008).
+  - `:iam_roles` — `[OCSF.IamRole.t()] | nil`. Roles assigned/removed in a
+    User Management (3007) event.
+  - `:updated_role` — `%OCSF.IamRole{} | nil`. Target role after a Role
+    Management (3008) change, when distinct from `iam_role`.
   - `:api` — `%OCSF.Api{} | nil`. Required for API Activity (6003).
-  - `:privileges` — `[String.t()] | nil`. List of assigned/revoked
-    privileges. Required for User Access Management (3005).
+  - `:privileges` — `[String.t()] | nil`. List of assigned/removed
+    privileges.
+  - `:resources` — `[String.t()] | nil`. List of assigned/removed
+    resource identifiers (Role Management, 3008).
   - `:actor` — `%OCSF.Actor{} | nil`.
   - `:http_request` — `%OCSF.HttpRequest{} | nil`.
   - `:src_endpoint` — `%OCSF.NetworkEndpoint{} | nil`.
@@ -53,10 +62,15 @@ defmodule OCSF.Event do
           auth_protocol_id: integer | nil,
           actor: OCSF.Actor.t() | nil,
           user: OCSF.User.t() | nil,
+          updated_user: OCSF.User.t() | nil,
           entity: OCSF.Entity.t() | nil,
           group: OCSF.Group.t() | nil,
+          iam_role: OCSF.IamRole.t() | nil,
+          iam_roles: [OCSF.IamRole.t()] | nil,
+          updated_role: OCSF.IamRole.t() | nil,
           api: OCSF.Api.t() | nil,
           privileges: [String.t()] | nil,
+          resources: [String.t()] | nil,
           http_request: OCSF.HttpRequest.t() | nil,
           src_endpoint: OCSF.NetworkEndpoint.t() | nil,
           dst_endpoint: OCSF.NetworkEndpoint.t() | nil,
@@ -78,10 +92,15 @@ defmodule OCSF.Event do
     :auth_protocol_id,
     :actor,
     :user,
+    :updated_user,
     :entity,
     :group,
+    :iam_role,
+    :iam_roles,
+    :updated_role,
     :api,
     :privileges,
+    :resources,
     :http_request,
     :src_endpoint,
     :dst_endpoint,
@@ -138,10 +157,15 @@ defmodule OCSF.Event do
       auth_protocol_id: get_attr(attrs, :auth_protocol_id),
       actor: cast_if(get_attr(attrs, :actor), OCSF.Actor),
       user: cast_if(get_attr(attrs, :user), OCSF.User),
+      updated_user: cast_if(get_attr(attrs, :updated_user), OCSF.User),
       entity: cast_if(get_attr(attrs, :entity), OCSF.Entity),
       group: cast_if(get_attr(attrs, :group), OCSF.Group),
+      iam_role: cast_if(get_attr(attrs, :iam_role), OCSF.IamRole),
+      iam_roles: cast_list_if(get_attr(attrs, :iam_roles), OCSF.IamRole),
+      updated_role: cast_if(get_attr(attrs, :updated_role), OCSF.IamRole),
       api: cast_if(get_attr(attrs, :api), OCSF.Api),
       privileges: get_attr(attrs, :privileges),
+      resources: get_attr(attrs, :resources),
       http_request: cast_if(get_attr(attrs, :http_request), OCSF.HttpRequest),
       src_endpoint: cast_if(get_attr(attrs, :src_endpoint), OCSF.NetworkEndpoint),
       dst_endpoint: cast_if(get_attr(attrs, :dst_endpoint), OCSF.NetworkEndpoint),
@@ -207,6 +231,9 @@ defmodule OCSF.Event do
   end
 
   defp get_attr(map, key), do: map[key] || map[to_string(key)]
+
+  defp cast_list_if(nil, _mod), do: nil
+  defp cast_list_if(list, mod) when is_list(list), do: Enum.map(list, &cast_if(&1, mod))
 
   defp cast_if(nil, _mod), do: nil
   defp cast_if(%{__struct__: mod} = s, mod), do: s

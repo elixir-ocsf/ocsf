@@ -6,6 +6,7 @@ defmodule OCSF.ObjectsTest do
     OCSF.Api,
     OCSF.Feature,
     OCSF.HttpRequest,
+    OCSF.IamRole,
     OCSF.Metadata,
     OCSF.NetworkEndpoint,
     OCSF.Organization,

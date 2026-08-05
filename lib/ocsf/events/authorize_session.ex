@@ -20,7 +20,11 @@ defmodule OCSF.Events.AuthorizeSession do
   > OCSF marks `privileges` and `group` as recommended with a `just_one`
   > constraint; pass the one relevant to the activity.
 
-  See `OCSF.User`, `OCSF.Group`, `OCSF.Event`, `OCSF.Activity`.
+  Pass an optional `:iam_role` (an `%OCSF.IamRole{}` or plain map) to
+  record the role materialised into the authorized session.
+
+  See `OCSF.User`, `OCSF.Group`, `OCSF.IamRole`, `OCSF.Event`,
+  `OCSF.Activity`.
   """
 
   @class_uid 3003
@@ -80,6 +84,7 @@ defmodule OCSF.Events.AuthorizeSession do
       status_detail: opts[:status_detail],
       user: opts[:user],
       group: opts[:group],
+      iam_role: opts[:iam_role],
       privileges: opts[:privileges],
       actor: opts[:actor],
       http_request: opts[:http_request],

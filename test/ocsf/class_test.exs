@@ -7,10 +7,18 @@ defmodule OCSF.ClassTest do
     test "returns all classes" do
       values = Class.values()
       assert {:Authentication, 3002} in values
-      assert {:"Account Change", 3001} in values
       assert {:"Authorize Session", 3003} in values
-      assert {:"User Access Management", 3005} in values
+      assert {:"Entity Management", 3004} in values
+      assert {:"Group Management", 3006} in values
+      assert {:"User Management", 3007} in values
+      assert {:"Role Management", 3008} in values
       assert {:"API Activity", 6003} in values
+    end
+
+    test "no longer exposes the deprecated 1.8 classes" do
+      values = Class.values()
+      refute {:"Account Change", 3001} in values
+      refute {:"User Access Management", 3005} in values
     end
   end
 
@@ -30,10 +38,10 @@ defmodule OCSF.ClassTest do
 
   describe "category/1" do
     test "returns the correct category_uid" do
-      assert Class.category(3001) == 3
       assert Class.category(3002) == 3
       assert Class.category(3003) == 3
-      assert Class.category(3005) == 3
+      assert Class.category(3007) == 3
+      assert Class.category(3008) == 3
       assert Class.category(6003) == 6
       assert Class.category(9999) == nil
     end

@@ -1,7 +1,7 @@
 defmodule OCSF.Events.AuthorizeSessionTest do
   use ExUnit.Case, async: true
 
-  alias OCSF.{Actor, Error, Group, Policy, Product, User}
+  alias OCSF.{Actor, Error, Group, IamRole, Policy, Product, User}
   alias OCSF.Events.AuthorizeSession
   alias OCSF.Test.SchemaValidator
 
@@ -71,6 +71,15 @@ defmodule OCSF.Events.AuthorizeSessionTest do
       opts = Keyword.put(base_opts(), :actor, %Actor{user: %User{uid: "admin-1"}})
       assert {:ok, event} = AuthorizeSession.assign_privileges(opts)
       assert event.actor.user.uid == "admin-1"
+    end
+
+    test "casts and carries an optional iam_role, surviving a round-trip" do
+      opts = Keyword.put(base_opts(), :iam_role, %{name: "admin", uid: "role-1"})
+      assert {:ok, event} = AuthorizeSession.assign_privileges(opts)
+      assert %IamRole{name: "admin", uid: "role-1"} = event.iam_role
+
+      assert {:ok, reparsed} = event |> OCSF.to_map() |> OCSF.from_map()
+      assert reparsed.iam_role == event.iam_role
     end
   end
 
