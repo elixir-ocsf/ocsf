@@ -2,12 +2,12 @@ defmodule OCSF.Activity do
   @moduledoc """
   OCSF per-class activity mappings.
 
-  Maps activity names to their OCSF 1.8 numeric identifiers within each
+  Maps activity names to their OCSF 1.9 numeric identifiers within each
   event class. Activities describe *what* happened in a given event class
   (e.g. Logon, Logoff for Authentication).
 
   See the OCSF
-  [activity_id](https://schema.ocsf.io/1.8.0/data_types/integer?caption=activity_id)
+  [activity_id](https://schema.ocsf.io/1.9.0/data_types/integer?caption=activity_id)
   definition.
 
   ## Activities by class
@@ -17,8 +17,9 @@ defmodule OCSF.Activity do
   | 3002      | `:Logon`          | 1  |
   | 3002      | `:Logoff`         | 2  |
   | 3002      | `:Preauth`        | 6  |
-  | 3001      | `:Create`         | 1  |
-  | 3001      | `:Delete`         | 6  |
+  | 3007      | `:Create`         | 1  |
+  | 3007      | `:"Assign Roles"` | 16 |
+  | 3008      | `:"Assign Resources"` | 6 |
   | 3003      | `:"Assign Privileges"` | 1 |
   | 6003      | `:Create`         | 1  |
   | ...       | ...               | ...|
@@ -38,26 +39,49 @@ defmodule OCSF.Activity do
       {:"Account Switch", 7},
       {:Other, 99}
     ],
-    3001 => [
-      {:Unknown, 0},
-      {:Create, 1},
-      {:Enable, 2},
-      {:"Password Change", 3},
-      {:"Password Reset", 4},
-      {:Disable, 5},
-      {:Delete, 6},
-      {:"Attach Policy", 7},
-      {:"Detach Policy", 8},
-      {:Lock, 9},
-      {:"MFA Factor Enable", 10},
-      {:"MFA Factor Disable", 11},
-      {:Unlock, 12},
-      {:Other, 99}
-    ],
     3003 => [
       {:Unknown, 0},
       {:"Assign Privileges", 1},
-      {:"Revoke Privileges", 2},
+      {:"Assign Groups", 2},
+      {:"Assign Roles", 3},
+      {:Other, 99}
+    ],
+    3007 => [
+      {:Unknown, 0},
+      {:Create, 1},
+      {:Update, 2},
+      {:Delete, 3},
+      {:Enable, 4},
+      {:Disable, 5},
+      {:Lock, 6},
+      {:Unlock, 7},
+      {:"Password Change", 8},
+      {:"Password Reset", 9},
+      {:"Attach Policies", 10},
+      {:"Detach Policies", 11},
+      {:"Enable MFA Factors", 12},
+      {:"Disable MFA Factors", 13},
+      {:"Assign Privileges", 14},
+      {:"Remove Privileges", 15},
+      {:"Assign Roles", 16},
+      {:"Remove Roles", 17},
+      {:"Add Programmatic Credentials", 18},
+      {:"Remove Programmatic Credentials", 19},
+      {:Other, 99}
+    ],
+    3008 => [
+      {:Unknown, 0},
+      {:Create, 1},
+      {:Update, 2},
+      {:Delete, 3},
+      {:"Assign Privileges", 4},
+      {:"Remove Privileges", 5},
+      {:"Assign Resources", 6},
+      {:"Remove Resources", 7},
+      {:"Attach Policies", 8},
+      {:"Detach Policies", 9},
+      {:"Add Programmatic Credentials", 10},
+      {:"Remove Programmatic Credentials", 11},
       {:Other, 99}
     ],
     3004 => [
@@ -87,6 +111,11 @@ defmodule OCSF.Activity do
       {:Create, 6},
       {:"Add Subgroup", 7},
       {:"Remove Subgroup", 8},
+      {:Update, 9},
+      {:"Attach Policies", 10},
+      {:"Detach Policies", 11},
+      {:"Assign Roles", 12},
+      {:"Remove Roles", 13},
       {:Other, 99}
     ],
     6003 => [
@@ -107,7 +136,7 @@ defmodule OCSF.Activity do
   ## Examples
 
       iex> OCSF.Activity.values(3003)
-      [{:Unknown, 0}, {:"Assign Privileges", 1}, {:"Revoke Privileges", 2}, {:Other, 99}]
+      [{:Unknown, 0}, {:"Assign Privileges", 1}, {:"Assign Groups", 2}, {:"Assign Roles", 3}, {:Other, 99}]
 
       iex> OCSF.Activity.values(9999)
       []

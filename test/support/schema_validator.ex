@@ -12,7 +12,7 @@ defmodule OCSF.Test.SchemaValidator do
     path =
       Path.join([
         File.cwd!(),
-        "test/fixtures/ocsf_schema/1.8",
+        "test/fixtures/ocsf_schema/1.9",
         "#{class_name}.json"
       ])
 

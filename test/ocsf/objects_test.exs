@@ -3,8 +3,10 @@ defmodule OCSF.ObjectsTest do
 
   @object_modules [
     OCSF.Actor,
+    OCSF.Api,
     OCSF.Feature,
     OCSF.HttpRequest,
+    OCSF.IamRole,
     OCSF.Metadata,
     OCSF.NetworkEndpoint,
     OCSF.Organization,

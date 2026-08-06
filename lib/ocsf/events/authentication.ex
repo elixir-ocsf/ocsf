@@ -3,7 +3,7 @@ defmodule OCSF.Events.Authentication do
   Builder for OCSF Authentication events (class 3002).
 
   Corresponds to the OCSF
-  [Authentication](https://schema.ocsf.io/1.8.0/classes/authentication)
+  [Authentication](https://schema.ocsf.io/1.9.0/classes/authentication)
   class under the Identity & Access Management category (UID 3).
 
   Each function maps to an OCSF activity:

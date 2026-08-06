@@ -58,9 +58,9 @@ defmodule OCSF.Events.AuthenticationTest do
              )
     end
 
-    test "auto-sets metadata.version to 1.8.0" do
+    test "auto-sets metadata.version to 1.9.0" do
       assert {:ok, event} = Authentication.logon(base_opts())
-      assert event.metadata.version == "1.8.0"
+      assert event.metadata.version == "1.9.0"
     end
   end
 
@@ -249,13 +249,13 @@ defmodule OCSF.Events.AuthenticationTest do
       opts =
         Keyword.put(base_opts(), :metadata, %Metadata{
           uid: "pre-set-uid",
-          version: "1.8.0",
+          version: "1.9.0",
           product: %Product{name: "Test"}
         })
 
       assert {:ok, event} = Authentication.logon(opts)
       # version is always overridden to library version
-      assert event.metadata.version == "1.8.0"
+      assert event.metadata.version == "1.9.0"
     end
   end
 

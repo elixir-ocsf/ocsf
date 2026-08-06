@@ -5,7 +5,7 @@ defmodule OCSF.EventFixtures do
     [
       metadata: %OCSF.Metadata{
         uid: OCSF.UUID.v7_string(),
-        version: "1.8.0",
+        version: "1.9.0",
         product: %OCSF.Product{name: "Test"}
       },
       time: DateTime.utc_now(),

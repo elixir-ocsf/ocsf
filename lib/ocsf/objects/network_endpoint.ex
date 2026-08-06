@@ -6,7 +6,7 @@ defmodule OCSF.NetworkEndpoint do
   either the source or destination endpoint.
 
   Corresponds to the OCSF
-  [Network Endpoint](https://schema.ocsf.io/1.8.0/objects/network_endpoint) object.
+  [Network Endpoint](https://schema.ocsf.io/1.9.0/objects/network_endpoint) object.
 
   ## Fields
 

@@ -51,8 +51,14 @@ defmodule OCSF.Policy do
     %{
       event
       | user: redact_struct(policy, event.user),
+        updated_user: redact_struct(policy, event.updated_user),
         entity: redact_struct(policy, event.entity),
         group: redact_struct(policy, event.group),
+        groups: redact_list(policy, event.groups),
+        iam_role: redact_struct(policy, event.iam_role),
+        iam_roles: redact_list(policy, event.iam_roles),
+        updated_role: redact_struct(policy, event.updated_role),
+        api: redact_struct(policy, event.api),
         actor: redact_actor(policy, event.actor),
         http_request: redact_struct(policy, event.http_request),
         src_endpoint: redact_struct(policy, event.src_endpoint),
@@ -60,6 +66,11 @@ defmodule OCSF.Policy do
         service: redact_struct(policy, event.service)
     }
   end
+
+  defp redact_list(_policy, nil), do: nil
+
+  defp redact_list(policy, structs) when is_list(structs),
+    do: Enum.map(structs, &redact_struct(policy, &1))
 
   defp redact_actor(_policy, nil), do: nil
 

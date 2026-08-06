@@ -5,8 +5,8 @@ Validate OCSF event fixtures against the official OCSF schema using ocsf-lib.
 Usage:
     python3 scripts/validate_ocsf.py
 
-Reads golden fixtures from test/fixtures/ocsf/1.8/authentication/*.json
-and validates them against the OCSF 1.8.0 compiled schema.
+Reads golden fixtures from test/fixtures/ocsf/1.9/authentication/*.json
+and validates them against the OCSF 1.9.0 compiled schema.
 """
 
 import json
@@ -110,7 +110,7 @@ def validate_event(event, schema, fixture_name):
     # 9. Check metadata.version
     metadata = event.get("metadata", {})
     version = metadata.get("version")
-    # We emit 1.8.0; the validation schema is 1.7.0 (additive compatible)
+    # We emit 1.9.0; older baselines are additive compatible
     if version is not None and not version.startswith("1."):
         errors.append(f"metadata.version: expected 1.x.x, got {version}")
 
@@ -122,22 +122,26 @@ def main():
     print("OCSF Compliance Validation (via ocsf-lib)")
     print("=" * 60)
 
-    # Load schema
-    # ocsf-lib API doesn't serve 1.8.0 yet; use 1.7.0 as baseline
-    # (1.7.0 -> 1.8.0 is additive; Authentication class is identical)
-    version = "1.7.0"
-    print(f"\nLoading OCSF {version} schema via ocsf-lib...")
-    print("  (Note: 1.8.0 not yet available via API; 1.7.0 used as baseline)")
-    try:
-        schema = get_schema(version)
-    except Exception as e:
-        print(f"ERROR loading schema: {e}")
+    # Load schema. Fall back to 1.7.0 if the ocsf-lib API does not
+    # serve 1.9.0 yet (older baselines are additive compatible; the
+    # Authentication class is identical).
+    schema = None
+    for version in ("1.9.0", "1.7.0"):
+        print(f"\nLoading OCSF {version} schema via ocsf-lib...")
+        try:
+            schema = get_schema(version)
+            break
+        except Exception as e:
+            print(f"  could not load {version}: {e}")
+
+    if schema is None:
+        print("ERROR: no OCSF schema version could be loaded")
         sys.exit(1)
 
     print(f"Schema loaded: {len(schema.classes)} classes")
 
     # Find and validate fixtures
-    fixtures_dir = Path("test/fixtures/ocsf/1.8/authentication")
+    fixtures_dir = Path("test/fixtures/ocsf/1.9/authentication")
     if not fixtures_dir.exists():
         print(f"ERROR: Fixtures directory not found: {fixtures_dir}")
         sys.exit(1)

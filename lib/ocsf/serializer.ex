@@ -38,8 +38,16 @@ defmodule OCSF.Serializer do
     |> put_auth_protocol_name(event.auth_protocol_id)
     |> put_not_nil(:actor, serialize_actor(event.actor))
     |> put_not_nil(:user, serialize_user(event.user))
+    |> put_not_nil(:updated_user, serialize_user(event.updated_user))
     |> put_not_nil(:entity, serialize_entity(event.entity))
     |> put_not_nil(:group, serialize_group(event.group))
+    |> put_groups(event.groups)
+    |> put_not_nil(:iam_role, serialize_iam_role(event.iam_role))
+    |> put_iam_roles(event.iam_roles)
+    |> put_not_nil(:updated_role, serialize_iam_role(event.updated_role))
+    |> put_not_nil(:api, serialize_api(event.api))
+    |> put_privileges(event.privileges)
+    |> put_resources(event.resources)
     |> put_not_nil(:http_request, serialize_http_request(event.http_request))
     |> put_not_nil(:src_endpoint, serialize_endpoint(event.src_endpoint))
     |> put_not_nil(:dst_endpoint, serialize_endpoint(event.dst_endpoint))
@@ -101,6 +109,21 @@ defmodule OCSF.Serializer do
     |> put_not_nil(:name, o.name)
   end
 
+  defp serialize_iam_role(nil), do: nil
+
+  defp serialize_iam_role(%OCSF.IamRole{} = r) do
+    %{}
+    |> put_not_nil(:name, r.name)
+    |> put_not_nil(:uid, r.uid)
+    |> put_not_nil(:account, r.account)
+    |> put_not_nil(:uid_alt, r.uid_alt)
+    |> put_not_empty_list(:policies, r.policies)
+    |> put_not_empty_list(:privileges, r.privileges)
+    |> put_not_empty_list(:resources, r.resources)
+    |> put_not_empty_list(:programmatic_credentials, r.programmatic_credentials)
+    |> put_not_nil(:session, r.session)
+  end
+
   defp serialize_entity(nil), do: nil
 
   defp serialize_entity(%OCSF.Entity{} = e) do
@@ -120,6 +143,15 @@ defmodule OCSF.Serializer do
     |> put_not_nil(:uid, g.uid)
     |> put_not_nil(:type, g.type)
     |> put_not_nil(:desc, g.desc)
+  end
+
+  defp serialize_api(nil), do: nil
+
+  defp serialize_api(%OCSF.Api{} = a) do
+    %{}
+    |> put_not_nil(:operation, a.operation)
+    |> put_not_nil(:version, a.version)
+    |> put_not_nil(:service, serialize_service(a.service))
   end
 
   defp serialize_actor(nil), do: nil
@@ -170,8 +202,29 @@ defmodule OCSF.Serializer do
   defp put_not_nil(map, _key, nil), do: map
   defp put_not_nil(map, key, value), do: Map.put(map, key, value)
 
+  defp put_not_empty_list(map, _key, nil), do: map
   defp put_not_empty_list(map, _key, []), do: map
   defp put_not_empty_list(map, key, list), do: Map.put(map, key, list)
+
+  defp put_privileges(map, nil), do: map
+  defp put_privileges(map, []), do: map
+  defp put_privileges(map, list) when is_list(list), do: Map.put(map, :privileges, list)
+
+  defp put_resources(map, nil), do: map
+  defp put_resources(map, []), do: map
+  defp put_resources(map, list) when is_list(list), do: Map.put(map, :resources, list)
+
+  defp put_groups(map, nil), do: map
+  defp put_groups(map, []), do: map
+
+  defp put_groups(map, list) when is_list(list),
+    do: Map.put(map, :groups, Enum.map(list, &serialize_group/1))
+
+  defp put_iam_roles(map, nil), do: map
+  defp put_iam_roles(map, []), do: map
+
+  defp put_iam_roles(map, list) when is_list(list),
+    do: Map.put(map, :iam_roles, Enum.map(list, &serialize_iam_role/1))
 
   defp put_name(map, _key, nil), do: map
   defp put_name(map, key, name), do: Map.put(map, key, Atom.to_string(name))

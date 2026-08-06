@@ -2,12 +2,12 @@ defmodule OCSF.Severity do
   @moduledoc """
   OCSF severity levels.
 
-  Maps human-readable severity names to their OCSF 1.8 numeric
+  Maps human-readable severity names to their OCSF 1.9 numeric
   identifiers. Used by event builders to resolve the `:severity`
   keyword into the `severity_id` field.
 
   See the OCSF
-  [severity_id](https://schema.ocsf.io/1.8.0/data_types/integer?caption=severity_id)
+  [severity_id](https://schema.ocsf.io/1.9.0/data_types/integer?caption=severity_id)
   definition.
 
   ## Values

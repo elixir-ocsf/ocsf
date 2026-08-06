@@ -7,7 +7,7 @@ defmodule OCSF.Organization do
   organization.
 
   Corresponds to the OCSF
-  [Organization](https://schema.ocsf.io/1.8.0/objects/organization) object.
+  [Organization](https://schema.ocsf.io/1.9.0/objects/organization) object.
 
   ## Fields
 

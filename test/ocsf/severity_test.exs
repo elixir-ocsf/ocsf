@@ -4,7 +4,7 @@ defmodule OCSF.SeverityTest do
   alias OCSF.Severity
 
   describe "values/0" do
-    test "covers OCSF 1.8 severity levels" do
+    test "covers OCSF 1.9 severity levels" do
       values = Severity.values()
       assert {:Unknown, 0} in values
       assert {:Informational, 1} in values

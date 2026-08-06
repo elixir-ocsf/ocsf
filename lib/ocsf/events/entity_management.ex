@@ -3,7 +3,7 @@ defmodule OCSF.Events.EntityManagement do
   Builder for OCSF Entity Management events (class 3004).
 
   Corresponds to the OCSF
-  [Entity Management](https://schema.ocsf.io/1.8.0/classes/entity_management)
+  [Entity Management](https://schema.ocsf.io/1.9.0/classes/entity_management)
   class under the Identity & Access Management category (UID 3). Used to
   audit the lifecycle of managed entities -- users, groups, and other
   records (create / update / delete / activate).

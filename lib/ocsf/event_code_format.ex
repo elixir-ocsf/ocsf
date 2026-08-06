@@ -78,7 +78,7 @@ defmodule OCSF.EventCodeFormat do
       iex> event = %OCSF.Event{class_uid: 3002, activity_id: 1,
       ...>   category_uid: 3, type_uid: 300201, severity_id: 1, status_id: 1,
       ...>   time: ~U[2026-04-15 10:00:00Z],
-      ...>   metadata: %OCSF.Metadata{uid: "x", version: "1.8.0",
+      ...>   metadata: %OCSF.Metadata{uid: "x", version: "1.9.0",
       ...>     product: %OCSF.Product{name: "T"}},
       ...>   user: %OCSF.User{uid: "u"}}
       iex> OCSF.EventCodeFormat.generate(format, event)

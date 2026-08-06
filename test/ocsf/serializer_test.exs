@@ -9,7 +9,7 @@ defmodule OCSF.SerializerTest do
       |> Keyword.merge(
         metadata: %OCSF.Metadata{
           uid: "test-uid",
-          version: "1.8.0",
+          version: "1.9.0",
           product: %OCSF.Product{name: "Test"}
         },
         time: ~U[2026-04-15 10:00:00Z],
@@ -28,7 +28,7 @@ defmodule OCSF.SerializerTest do
       assert map[:type_uid] == 300_201
       assert map[:activity_id] == 1
       assert map[:metadata][:uid] == "test-uid"
-      assert map[:metadata][:version] == "1.8.0"
+      assert map[:metadata][:version] == "1.9.0"
       assert map[:metadata][:product][:name] == "Test"
       assert map[:user][:uid] == "u1"
       assert map[:user][:org][:uid] == "org-1"
@@ -113,7 +113,7 @@ defmodule OCSF.SerializerTest do
         valid_event()
         | metadata: %OCSF.Metadata{
             uid: "test-uid",
-            version: "1.8.0",
+            version: "1.9.0",
             product: %OCSF.Product{
               name: "TestProduct",
               vendor_name: "Vendor",
@@ -176,7 +176,7 @@ defmodule OCSF.SerializerTest do
         valid_event()
         | metadata: %OCSF.Metadata{
             uid: "test-uid",
-            version: "1.8.0",
+            version: "1.9.0",
             product: %OCSF.Product{name: "Test"},
             profiles: ["host", "cloud"]
           }
@@ -228,7 +228,7 @@ defmodule OCSF.SerializerTest do
         valid_event()
         | metadata: %OCSF.Metadata{
             uid: "test-uid",
-            version: "1.8.0",
+            version: "1.9.0",
             product: %OCSF.Product{name: "Test"},
             correlation_uid: "corr-1",
             trace_uid: "trace-1",
@@ -268,7 +268,7 @@ defmodule OCSF.SerializerTest do
         OCSF.Event.new(
           metadata: %OCSF.Metadata{
             uid: "test-uid",
-            version: "1.8.0",
+            version: "1.9.0",
             product: %OCSF.Product{name: "Test"}
           },
           time: ~U[2026-04-15 10:00:00Z],
@@ -295,7 +295,7 @@ defmodule OCSF.SerializerTest do
         OCSF.Event.new(
           metadata: %OCSF.Metadata{
             uid: "test-uid",
-            version: "1.8.0",
+            version: "1.9.0",
             product: nil
           },
           time: ~U[2026-04-15 10:00:00Z],
@@ -317,7 +317,7 @@ defmodule OCSF.SerializerTest do
         OCSF.Event.new(
           metadata: %OCSF.Metadata{
             uid: "test-uid",
-            version: "1.8.0",
+            version: "1.9.0",
             product: %OCSF.Product{name: "Test"}
           },
           time: ~U[2026-04-15 10:00:00Z],
@@ -339,7 +339,7 @@ defmodule OCSF.SerializerTest do
         OCSF.Event.new(
           metadata: %OCSF.Metadata{
             uid: "test-uid",
-            version: "1.8.0",
+            version: "1.9.0",
             product: %OCSF.Product{name: "Test", feature: nil}
           },
           time: ~U[2026-04-15 10:00:00Z],
@@ -361,7 +361,7 @@ defmodule OCSF.SerializerTest do
         OCSF.Event.new(
           metadata: %OCSF.Metadata{
             uid: "test-uid",
-            version: "1.8.0",
+            version: "1.9.0",
             product: %OCSF.Product{name: "Test"}
           },
           time: nil,

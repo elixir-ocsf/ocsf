@@ -31,8 +31,16 @@ defmodule OCSF.Deserializer do
       auth_protocol_id: get(map, :auth_protocol_id),
       actor: parse_if(get(map, :actor), &parse_actor/1),
       user: parse_if(get(map, :user), &parse_user/1),
+      updated_user: parse_if(get(map, :updated_user), &parse_user/1),
       entity: parse_if(get(map, :entity), &parse_entity/1),
       group: parse_if(get(map, :group), &parse_group/1),
+      groups: parse_list_if(get(map, :groups), &parse_group/1),
+      iam_role: parse_if(get(map, :iam_role), &parse_iam_role/1),
+      iam_roles: parse_list_if(get(map, :iam_roles), &parse_iam_role/1),
+      updated_role: parse_if(get(map, :updated_role), &parse_iam_role/1),
+      api: parse_if(get(map, :api), &parse_api/1),
+      privileges: get(map, :privileges),
+      resources: get(map, :resources),
       http_request: parse_if(get(map, :http_request), &parse_http_request/1),
       src_endpoint: parse_if(get(map, :src_endpoint), &parse_endpoint/1),
       dst_endpoint: parse_if(get(map, :dst_endpoint), &parse_endpoint/1),
@@ -103,12 +111,34 @@ defmodule OCSF.Deserializer do
     }
   end
 
+  defp parse_iam_role(r) do
+    %OCSF.IamRole{
+      name: get(r, :name),
+      uid: get(r, :uid),
+      account: get(r, :account),
+      uid_alt: get(r, :uid_alt),
+      policies: get(r, :policies),
+      privileges: get(r, :privileges),
+      resources: get(r, :resources),
+      programmatic_credentials: get(r, :programmatic_credentials),
+      session: get(r, :session)
+    }
+  end
+
   defp parse_group(g) do
     %OCSF.Group{
       name: get(g, :name),
       uid: get(g, :uid),
       type: get(g, :type),
       desc: get(g, :desc)
+    }
+  end
+
+  defp parse_api(a) do
+    %OCSF.Api{
+      operation: get(a, :operation),
+      version: get(a, :version),
+      service: parse_if(get(a, :service), &parse_service/1)
     }
   end
 
@@ -166,6 +196,9 @@ defmodule OCSF.Deserializer do
 
   defp parse_if(nil, _fun), do: nil
   defp parse_if(val, fun), do: fun.(val)
+
+  defp parse_list_if(nil, _fun), do: nil
+  defp parse_list_if(list, fun) when is_list(list), do: Enum.map(list, fun)
 
   defp get(map, key) when is_atom(key) do
     Map.get(map, key) || Map.get(map, Atom.to_string(key))
