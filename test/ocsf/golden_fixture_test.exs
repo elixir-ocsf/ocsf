@@ -3,7 +3,10 @@ defmodule OCSF.GoldenFixtureTest do
 
   alias OCSF.Events.Authentication
 
-  @fixtures_dir "test/fixtures/ocsf/1.9/authentication"
+  # Same derivation as scripts/gen_fixture.exs: the fixtures follow the
+  # OCSF version the library targets.
+  @ocsf_major_minor OCSF.version() |> String.split(".") |> Enum.take(2) |> Enum.join(".")
+  @fixtures_dir "test/fixtures/ocsf/#{@ocsf_major_minor}/authentication"
 
   defp load_fixture(filename) do
     Path.join(@fixtures_dir, filename)

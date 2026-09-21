@@ -29,13 +29,13 @@
     "ip": "10.0.0.1"
   },
   "auth_protocol": "OAUTH 2.0",
-  "activity_id": 1,
-  "auth_protocol_id": 6,
-  "category_uid": 3,
   "class_uid": 3002,
+  "activity_id": 1,
+  "category_uid": 3,
   "severity_id": 1,
   "status_id": 1,
   "type_uid": 300201,
+  "auth_protocol_id": 6,
   "activity_name": "Logon",
   "category_name": "Identity & Access Management",
   "class_name": "Authentication"

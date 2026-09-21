@@ -85,7 +85,7 @@ Good:
 @moduledoc """
 OCSF severity levels.
 
-Maps human-readable severity names to their OCSF 1.8 numeric
+Maps human-readable severity names to their OCSF 1.9 numeric
 identifiers. Used by event builders to resolve the `:severity`
 keyword into the `severity_id` field on `OCSF.Event`.
 """
@@ -110,7 +110,7 @@ Use `##` for top-level sections inside `@moduledoc`:
 ## OCSF mapping
 
 This module corresponds to the OCSF
-[Authentication](https://schema.ocsf.io/1.8.0/classes/authentication)
+[Authentication](https://schema.ocsf.io/1.9.0/classes/authentication)
 class (UID 3002).
 
 ## Activities
@@ -228,7 +228,7 @@ Returns the OCSF schema version.
 ## Examples
 
     iex> OCSF.version()
-    "1.8.0"
+    "1.9.0"
 """
 ```
 
@@ -250,7 +250,7 @@ would make poor doctests:
       )
 
     event.metadata.version
-    #=> "1.8.0"
+    #=> "1.9.0"
 """
 ```
 
@@ -298,7 +298,7 @@ Link to the OCSF schema for every module that maps to an OCSF concept:
 
 ```elixir
 Corresponds to the OCSF
-[Metadata](https://schema.ocsf.io/1.8.0/objects/metadata) object.
+[Metadata](https://schema.ocsf.io/1.9.0/objects/metadata) object.
 ```
 
 ### 5.4 SPEC cross-references
@@ -336,7 +336,7 @@ defmodule OCSF.User do
   OCSF User object.
 
   Represents a user identity in an OCSF event. Corresponds to the
-  OCSF [User](https://schema.ocsf.io/1.8.0/objects/user) object.
+  OCSF [User](https://schema.ocsf.io/1.9.0/objects/user) object.
 
   ## Fields
 
@@ -374,11 +374,11 @@ defmodule OCSF.Severity do
   @moduledoc """
   OCSF severity levels.
 
-  Maps severity names to their OCSF 1.8 numeric identifiers (0-6, 99).
+  Maps severity names to their OCSF 1.9 numeric identifiers (0-6, 99).
   Used by event builders to resolve the `:severity` keyword.
 
   See the OCSF
-  [severity_id](https://schema.ocsf.io/1.8.0/data_types/integer?caption=severity_id)
+  [severity_id](https://schema.ocsf.io/1.9.0/data_types/integer?caption=severity_id)
   definition.
 
   ## Values
@@ -408,7 +408,7 @@ defmodule OCSF.Severity do
   **sink**, **policy**, **redaction**, **data class**.
 - Use the `__` flat-column form when discussing persistence:
   `` `user__email_addr` ``, not "user.email_addr column".
-- Say "OCSF 1.8" not "the OCSF standard" when the version matters.
+- Say "OCSF 1.9" not "the OCSF standard" when the version matters.
 
 ---
 

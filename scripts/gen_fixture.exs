@@ -1,3 +1,26 @@
+# Regenerates the Authentication golden fixtures that
+# test/ocsf/golden_fixture_test.exs compares builder output against.
+#
+#     mix run scripts/gen_fixture.exs
+#
+# The target directory follows the OCSF version the library targets
+# (test/fixtures/ocsf/<major.minor>/authentication), so a version bump
+# never leaves the fixtures behind.
+
+[major, minor, _patch] = String.split(OCSF.version(), ".")
+
+fixtures_dir =
+  Path.join([__DIR__, "..", "test", "fixtures", "ocsf", "#{major}.#{minor}", "authentication"])
+  |> Path.expand()
+
+File.mkdir_p!(fixtures_dir)
+
+write_fixture = fn filename, event ->
+  json = event |> OCSF.to_map() |> Jason.encode!(pretty: true)
+  File.write!(Path.join(fixtures_dir, filename), json <> "\n")
+  IO.puts("Written #{Path.relative_to_cwd(Path.join(fixtures_dir, filename))}")
+end
+
 {:ok, event} =
   OCSF.Events.Authentication.logon(
     user: %{uid: "018f19fe-6d4c-71c2-a84b-5d2d8c7f1e90", name: "Jane Doe",
@@ -12,10 +35,7 @@
     metadata: %{uid: "018f1a03-2a8f-7b40-9e12-b7aa47bd0c01", product: %{name: "Cryptr"}}
   )
 
-json = event |> OCSF.to_map() |> Jason.encode!(pretty: true)
-
-File.write!("test/fixtures/ocsf/1.8/authentication/logon_success.json", json <> "\n")
-IO.puts("Written logon_success.json")
+write_fixture.("logon_success.json", event)
 
 # Failure case
 {:ok, fail_event} =
@@ -29,9 +49,7 @@ IO.puts("Written logon_success.json")
     metadata: %{uid: "018f1a03-3b9c-7c50-af23-c8bb58ce1d12", product: %{name: "Cryptr"}}
   )
 
-json = fail_event |> OCSF.to_map() |> Jason.encode!(pretty: true)
-File.write!("test/fixtures/ocsf/1.8/authentication/logon_failure.json", json <> "\n")
-IO.puts("Written logon_failure.json")
+write_fixture.("logon_failure.json", fail_event)
 
 # Preauth case
 {:ok, pre_event} =
@@ -45,6 +63,4 @@ IO.puts("Written logon_failure.json")
     metadata: %{uid: "018f1a03-1a7e-7a30-8d01-a6aa36ac0b00", product: %{name: "Cryptr"}}
   )
 
-json = pre_event |> OCSF.to_map() |> Jason.encode!(pretty: true)
-File.write!("test/fixtures/ocsf/1.8/authentication/preauth.json", json <> "\n")
-IO.puts("Written preauth.json")
+write_fixture.("preauth.json", pre_event)
