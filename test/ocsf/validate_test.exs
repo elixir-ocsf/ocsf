@@ -16,6 +16,22 @@ defmodule OCSF.ValidateTest do
     test "wrong metadata.version fails" do
       event = put_in(valid_event().metadata.version, "0.9.0")
 
+      assert {:error, %OCSF.Error{reason: :invalid, path: "metadata.version", details: details}} =
+               OCSF.validate(event)
+
+      assert details == %{expected: ["1.8.0", "1.9.0"], got: "0.9.0"}
+    end
+
+    test "every supported metadata.version passes" do
+      for version <- OCSF.supported_versions() do
+        event = put_in(valid_event().metadata.version, version)
+        assert {:ok, _event} = OCSF.validate(event), "#{version} should be accepted"
+      end
+    end
+
+    test "a version older than the supported set fails" do
+      event = put_in(valid_event().metadata.version, "1.7.0")
+
       assert {:error, %OCSF.Error{reason: :invalid, path: "metadata.version"}} =
                OCSF.validate(event)
     end

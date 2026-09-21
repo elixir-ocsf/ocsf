@@ -14,8 +14,17 @@ defmodule OCSF do
 
   @ocsf_version "1.9.0"
 
+  # Versions accepted on `metadata.version` by `validate/1`. OCSF minor
+  # releases are additive, so events persisted under an earlier version
+  # still deserialize; builders always emit `version/0`.
+  @supported_versions ["1.8.0", @ocsf_version]
+
   @doc """
   Return the OCSF schema version this library targets.
+
+  Every event built by the `OCSF.Events.*` builders carries this value
+  in `metadata.version`. See `supported_versions/0` for the versions
+  `validate/1` accepts when reading events back.
 
   ## Examples
 
@@ -24,6 +33,24 @@ defmodule OCSF do
   """
   @spec version() :: String.t()
   def version, do: @ocsf_version
+
+  @doc """
+  Return the OCSF schema versions `validate/1` accepts in `metadata.version`.
+
+  OCSF minor releases are additive, so an event persisted by an earlier
+  release of this library (e.g. `"1.8.0"`) still validates and
+  deserializes. The current `version/0` is always included.
+
+  ## Examples
+
+      iex> OCSF.supported_versions()
+      ["1.8.0", "1.9.0"]
+
+      iex> OCSF.version() in OCSF.supported_versions()
+      true
+  """
+  @spec supported_versions() :: [String.t()]
+  def supported_versions, do: @supported_versions
 
   @doc """
   Convert an `%OCSF.Event{}` to an OCSF-compliant nested map.
@@ -167,10 +194,15 @@ defmodule OCSF do
   defp check_metadata_version(%{metadata: %{version: nil}}),
     do: {:error, OCSF.Error.new(:missing, "metadata.version")}
 
-  defp check_metadata_version(%{metadata: %{version: v}}) when v == @ocsf_version, do: :ok
+  defp check_metadata_version(%{metadata: %{version: v}}) when v in @supported_versions, do: :ok
 
   defp check_metadata_version(%{metadata: %{version: v}}),
-    do: {:error, OCSF.Error.new(:invalid, "metadata.version", %{expected: @ocsf_version, got: v})}
+    do:
+      {:error,
+       OCSF.Error.new(:invalid, "metadata.version", %{
+         expected: @supported_versions,
+         got: v
+       })}
 
   defp check_metadata_product(%{metadata: %{product: %OCSF.Product{}}}), do: :ok
   defp check_metadata_product(_), do: {:error, OCSF.Error.new(:missing, "metadata.product")}

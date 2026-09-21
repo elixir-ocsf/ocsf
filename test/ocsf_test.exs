@@ -20,6 +20,13 @@ defmodule OCSFTest do
     event
   end
 
+  describe "supported_versions/0" do
+    test "lists the accepted metadata.version values, current one included" do
+      assert ["1.8.0", "1.9.0"] = OCSF.supported_versions()
+      assert OCSF.version() in OCSF.supported_versions()
+    end
+  end
+
   describe "version/0" do
     test "returns OCSF 1.9.0" do
       assert OCSF.version() == "1.9.0"

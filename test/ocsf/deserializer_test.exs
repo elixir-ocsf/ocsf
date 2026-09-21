@@ -43,6 +43,14 @@ defmodule OCSF.DeserializerTest do
       assert restored.time == original.time
     end
 
+    test "an event persisted under OCSF 1.8.0 still deserializes" do
+      map = OCSF.to_map(valid_event()) |> put_in([:metadata, :version], "1.8.0")
+
+      assert {:ok, restored} = OCSF.Event.from_map(map)
+      assert restored.metadata.version == "1.8.0"
+      assert restored.class_uid == 3002
+    end
+
     test "works with string-keyed maps (from Jason.decode!)" do
       original = valid_event()
       json = Jason.encode!(original)
