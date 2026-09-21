@@ -40,7 +40,7 @@ defmodule OCSF.Deserializer do
       updated_role: parse_if(get(map, :updated_role), &parse_iam_role/1),
       api: parse_if(get(map, :api), &parse_api/1),
       privileges: get(map, :privileges),
-      resources: get(map, :resources),
+      resources: parse_list_if(get(map, :resources), &parse_resource_details/1),
       http_request: parse_if(get(map, :http_request), &parse_http_request/1),
       src_endpoint: parse_if(get(map, :src_endpoint), &parse_endpoint/1),
       dst_endpoint: parse_if(get(map, :dst_endpoint), &parse_endpoint/1),
@@ -119,7 +119,7 @@ defmodule OCSF.Deserializer do
       uid_alt: get(r, :uid_alt),
       policies: get(r, :policies),
       privileges: get(r, :privileges),
-      resources: get(r, :resources),
+      resources: parse_list_if(get(r, :resources), &parse_resource_details/1),
       programmatic_credentials: get(r, :programmatic_credentials),
       session: get(r, :session)
     }
@@ -131,6 +131,22 @@ defmodule OCSF.Deserializer do
       uid: get(g, :uid),
       type: get(g, :type),
       desc: get(g, :desc)
+    }
+  end
+
+  defp parse_resource_details(r) do
+    %OCSF.ResourceDetails{
+      name: get(r, :name),
+      uid: get(r, :uid),
+      uid_alt: get(r, :uid_alt),
+      type: get(r, :type),
+      labels: get(r, :labels),
+      namespace: get(r, :namespace),
+      region: get(r, :region),
+      version: get(r, :version),
+      owner: parse_if(get(r, :owner), &parse_user/1),
+      group: parse_if(get(r, :group), &parse_group/1),
+      data: get(r, :data)
     }
   end
 

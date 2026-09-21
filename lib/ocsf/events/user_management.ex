@@ -38,10 +38,12 @@ defmodule OCSF.Events.UserManagement do
   > Management class. Builders return `{:error, _}` if omitted.
 
   Optional `:updated_user` records the target user after the change,
-  `:iam_roles` the roles assigned or removed, and `:privileges` the
-  privileges assigned or removed.
+  `:iam_roles` the roles assigned or removed, `:privileges` the
+  privileges assigned or removed, and `:resources` the
+  `OCSF.ResourceDetails` those privileges and roles give access to.
 
-  See `OCSF.User`, `OCSF.IamRole`, `OCSF.Event`, `OCSF.Activity`.
+  See `OCSF.User`, `OCSF.IamRole`, `OCSF.ResourceDetails`, `OCSF.Event`,
+  `OCSF.Activity`.
   """
 
   @class_uid 3007
@@ -207,6 +209,7 @@ defmodule OCSF.Events.UserManagement do
       updated_user: opts[:updated_user],
       iam_roles: opts[:iam_roles],
       privileges: opts[:privileges],
+      resources: opts[:resources],
       actor: opts[:actor],
       http_request: opts[:http_request],
       src_endpoint: opts[:src_endpoint],

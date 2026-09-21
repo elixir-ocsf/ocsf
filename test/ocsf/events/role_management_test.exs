@@ -1,7 +1,7 @@
 defmodule OCSF.Events.RoleManagementTest do
   use ExUnit.Case, async: true
 
-  alias OCSF.{Actor, Error, IamRole, Policy, Product, Service, User}
+  alias OCSF.{Actor, Error, IamRole, Policy, Product, ResourceDetails, Service, User}
   alias OCSF.Events.RoleManagement
   alias OCSF.Test.SchemaValidator
 
@@ -75,12 +75,47 @@ defmodule OCSF.Events.RoleManagementTest do
         base_opts()
         |> Keyword.put(:updated_role, %{name: "admin", uid: "role-1", privileges: ["*"]})
         |> Keyword.put(:privileges, ["s3:read"])
-        |> Keyword.put(:resources, ["arn:aws:s3:::bucket"])
+        |> Keyword.put(:resources, [%{uid: "arn:aws:s3:::bucket", type: "bucket"}])
 
       assert {:ok, event} = RoleManagement.assign_privileges(opts)
       assert %IamRole{name: "admin", privileges: ["*"]} = event.updated_role
       assert event.privileges == ["s3:read"]
-      assert event.resources == ["arn:aws:s3:::bucket"]
+      assert [%ResourceDetails{uid: "arn:aws:s3:::bucket", type: "bucket"}] = event.resources
+    end
+
+    test "casts nested owner and group of each resource" do
+      opts =
+        Keyword.put(base_opts(), :resources, [
+          %{name: "reports", owner: %{uid: "u1", org: %{uid: "acme"}}, group: %{uid: "g1"}}
+        ])
+
+      assert {:ok, event} = RoleManagement.assign_resources(opts)
+
+      assert [
+               %ResourceDetails{
+                 name: "reports",
+                 owner: %User{uid: "u1", org: %OCSF.Organization{uid: "acme"}},
+                 group: %OCSF.Group{uid: "g1"}
+               }
+             ] = event.resources
+    end
+
+    test "casts resources nested in iam_role to %OCSF.ResourceDetails{}" do
+      opts =
+        Keyword.put(base_opts(), :iam_role, %{
+          name: "admin",
+          uid: "role-1",
+          resources: [%{uid: "arn:1"}]
+        })
+
+      assert {:ok, event} = RoleManagement.update(opts)
+      assert [%ResourceDetails{uid: "arn:1"}] = event.iam_role.resources
+    end
+
+    test "resources pass schema validation, including the resource_details object" do
+      opts = Keyword.put(base_opts(), :resources, [%{uid: "arn:1", name: "bucket"}])
+      {:ok, event} = RoleManagement.assign_resources(opts)
+      assert {:ok, []} = SchemaValidator.validate_event(OCSF.to_map(event), @schema)
     end
   end
 
@@ -157,11 +192,24 @@ defmodule OCSF.Events.RoleManagementTest do
             uid: "role-1",
             account: "acme",
             policies: ["p1"],
-            resources: ["arn:1"]
+            resources: [%{uid: "arn:1"}]
           },
-          updated_role: %{name: "admin", uid: "role-1", resources: ["arn:1", "arn:2"]},
+          updated_role: %{
+            name: "admin",
+            uid: "role-1",
+            resources: [%{uid: "arn:1"}, %{uid: "arn:2"}]
+          },
           privileges: ["s3:read"],
-          resources: ["arn:2"],
+          resources: [
+            %{
+              uid: "arn:2",
+              name: "bucket",
+              labels: ["prod"],
+              owner: %{uid: "u1", name: "Alice"},
+              group: %{uid: "g1"},
+              data: %{"tier" => "gold"}
+            }
+          ],
           status: :Success
         )
 
@@ -169,7 +217,11 @@ defmodule OCSF.Events.RoleManagementTest do
       assert reparsed.iam_role == event.iam_role
       assert reparsed.updated_role == event.updated_role
       assert reparsed.privileges == ["s3:read"]
-      assert reparsed.resources == ["arn:2"]
+      assert reparsed.resources == event.resources
+
+      assert [%ResourceDetails{owner: %User{name: "Alice"}, labels: ["prod"]}] =
+               reparsed.resources
+
       assert reparsed.class_uid == 3008
       assert reparsed.activity_id == 6
     end
@@ -195,6 +247,22 @@ defmodule OCSF.Events.RoleManagementTest do
       assert redacted.iam_role.programmatic_credentials == nil
       assert redacted.updated_role.programmatic_credentials == nil
       assert redacted.iam_role.uid == "role-1"
+    end
+
+    test "deny policy redacts the owner of each resource but keeps the resource" do
+      opts =
+        Keyword.put(base_opts(), :resources, [
+          %{uid: "arn:1", owner: %{uid: "o1", name: "Owner", email_addr: "o@test.com"}}
+        ])
+
+      {:ok, event} = RoleManagement.assign_resources(opts)
+
+      redacted = OCSF.redact(event, %Policy{deny: [:contact, :identity]})
+      [resource] = redacted.resources
+      assert resource.uid == "arn:1"
+      assert resource.owner.uid == "o1"
+      assert resource.owner.name == nil
+      assert resource.owner.email_addr == nil
     end
 
     test "deny policy nils PII fields on the actor user but keeps the role" do

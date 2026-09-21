@@ -76,6 +76,14 @@ defmodule OCSF.Events.ApiActivityTest do
       assert event.http_request.http_method == "POST"
       assert event.status_detail == "created"
     end
+
+    test "casts resources to %OCSF.ResourceDetails{} and keeps them schema-conformant" do
+      opts = Keyword.put(base_opts(), :resources, [%{uid: "user/u-42", type: "user"}])
+
+      assert {:ok, event} = ApiActivity.delete(opts)
+      assert [%OCSF.ResourceDetails{uid: "user/u-42", type: "user"}] = event.resources
+      assert {:ok, []} = SchemaValidator.validate_event(OCSF.to_map(event), @schema)
+    end
   end
 
   describe "OCSF schema conformance" do

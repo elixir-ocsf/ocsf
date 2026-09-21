@@ -30,9 +30,11 @@ defmodule OCSF.Events.RoleManagement do
 
   Optional `:updated_role` records the target role after the change,
   `:privileges` the privileges assigned or removed, and `:resources` the
-  resources assigned or removed.
+  `OCSF.ResourceDetails` assigned or removed (each needs a `name` or a
+  `uid`).
 
-  See `OCSF.IamRole`, `OCSF.Event`, `OCSF.Activity`.
+  See `OCSF.IamRole`, `OCSF.ResourceDetails`, `OCSF.Event`,
+  `OCSF.Activity`.
   """
 
   @class_uid 3008
@@ -88,7 +90,8 @@ defmodule OCSF.Events.RoleManagement do
   @doc """
   Build an Assign Resources event (activity_id 6).
 
-  Pass `:resources` (a list of resource identifiers) granted to the role.
+  Pass `:resources` (a list of `OCSF.ResourceDetails` maps, each with a
+  `:name` or `:uid`) granted to the role.
   """
   @spec assign_resources(keyword) :: {:ok, OCSF.Event.t()} | {:error, OCSF.Error.t()}
   def assign_resources(opts), do: build(6, opts)

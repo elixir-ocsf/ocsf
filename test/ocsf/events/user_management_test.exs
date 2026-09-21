@@ -137,6 +137,20 @@ defmodule OCSF.Events.UserManagementTest do
       assert event.service.name == "idp"
       assert event.status_detail == "admin_initiated"
     end
+
+    test "casts resources to %OCSF.ResourceDetails{} and keeps them schema-conformant" do
+      opts =
+        Keyword.put(base_opts(), :resources, [%{uid: "arn:aws:s3:::reports", type: "bucket"}])
+
+      assert {:ok, event} = UserManagement.assign_privileges(opts)
+
+      assert [%OCSF.ResourceDetails{uid: "arn:aws:s3:::reports", type: "bucket"}] =
+               event.resources
+
+      event_map = OCSF.to_map(event)
+      assert [%{uid: "arn:aws:s3:::reports", type: "bucket"}] = event_map[:resources]
+      assert {:ok, []} = SchemaValidator.validate_event(event_map, @schema)
+    end
   end
 
   describe "OCSF schema conformance" do

@@ -119,7 +119,7 @@ defmodule OCSF.Serializer do
     |> put_not_nil(:uid_alt, r.uid_alt)
     |> put_not_empty_list(:policies, r.policies)
     |> put_not_empty_list(:privileges, r.privileges)
-    |> put_not_empty_list(:resources, r.resources)
+    |> put_resources(r.resources)
     |> put_not_empty_list(:programmatic_credentials, r.programmatic_credentials)
     |> put_not_nil(:session, r.session)
   end
@@ -143,6 +143,21 @@ defmodule OCSF.Serializer do
     |> put_not_nil(:uid, g.uid)
     |> put_not_nil(:type, g.type)
     |> put_not_nil(:desc, g.desc)
+  end
+
+  defp serialize_resource_details(%OCSF.ResourceDetails{} = r) do
+    %{}
+    |> put_not_nil(:name, r.name)
+    |> put_not_nil(:uid, r.uid)
+    |> put_not_nil(:uid_alt, r.uid_alt)
+    |> put_not_nil(:type, r.type)
+    |> put_not_empty_list(:labels, r.labels)
+    |> put_not_nil(:namespace, r.namespace)
+    |> put_not_nil(:region, r.region)
+    |> put_not_nil(:version, r.version)
+    |> put_not_nil(:owner, serialize_user(r.owner))
+    |> put_not_nil(:group, serialize_group(r.group))
+    |> put_not_nil(:data, r.data)
   end
 
   defp serialize_api(nil), do: nil
@@ -212,7 +227,9 @@ defmodule OCSF.Serializer do
 
   defp put_resources(map, nil), do: map
   defp put_resources(map, []), do: map
-  defp put_resources(map, list) when is_list(list), do: Map.put(map, :resources, list)
+
+  defp put_resources(map, list) when is_list(list),
+    do: Map.put(map, :resources, Enum.map(list, &serialize_resource_details/1))
 
   defp put_groups(map, nil), do: map
   defp put_groups(map, []), do: map

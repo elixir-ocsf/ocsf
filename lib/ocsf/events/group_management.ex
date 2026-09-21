@@ -25,7 +25,10 @@ defmodule OCSF.Events.GroupManagement do
   > Management class. Builders return `{:error, _}` if omitted. For
   > membership activities, pass the affected `user` as well.
 
-  See `OCSF.Group`, `OCSF.Event`, `OCSF.Activity`.
+  Optional `:resources` lists the `OCSF.ResourceDetails` the group's
+  privileges give access to.
+
+  See `OCSF.Group`, `OCSF.ResourceDetails`, `OCSF.Event`, `OCSF.Activity`.
   """
 
   @class_uid 3006
@@ -119,6 +122,7 @@ defmodule OCSF.Events.GroupManagement do
       status_detail: opts[:status_detail],
       group: opts[:group],
       user: opts[:user],
+      resources: opts[:resources],
       actor: opts[:actor],
       http_request: opts[:http_request],
       src_endpoint: opts[:src_endpoint],

@@ -1,7 +1,7 @@
 defmodule OCSF.FlattenTest do
   use ExUnit.Case, async: true
 
-  alias OCSF.{Actor, HttpRequest, IamRole, NetworkEndpoint, Organization, Product, Service, User}
+  alias OCSF.{Actor, HttpRequest, IamRole, NetworkEndpoint, Organization, Product, User}
   alias OCSF.Events.UserManagement
   alias OCSF.Flatten
   alias OCSF.Test.SchemaValidator
@@ -36,7 +36,6 @@ defmodule OCSF.FlattenTest do
           http_method: "POST"
         },
         src_endpoint: %NetworkEndpoint{ip: {10, 0, 0, 1}},
-        service: %Service{name: "iam"},
         severity: :Informational,
         status: :Success,
         metadata: %{product: %Product{name: "cryptr"}, profiles: ["cloud"]}
@@ -118,7 +117,7 @@ defmodule OCSF.FlattenTest do
       assert flat["metadata__product__name"] == "cryptr"
       assert flat["src_endpoint__ip"] == "10.0.0.1"
       assert flat["privileges"] == ["policy:write", "policy:read"]
-      assert is_list(flat["iam_roles"])
+      assert [_, _] = flat["iam_roles"]
 
       reconstructed = Flatten.unflatten(flat)
 

@@ -59,6 +59,7 @@ defmodule OCSF.Policy do
         iam_roles: redact_list(policy, event.iam_roles),
         updated_role: redact_struct(policy, event.updated_role),
         api: redact_struct(policy, event.api),
+        resources: redact_resources(policy, event.resources),
         actor: redact_actor(policy, event.actor),
         http_request: redact_struct(policy, event.http_request),
         src_endpoint: redact_struct(policy, event.src_endpoint),
@@ -71,6 +72,17 @@ defmodule OCSF.Policy do
 
   defp redact_list(policy, structs) when is_list(structs),
     do: Enum.map(structs, &redact_struct(policy, &1))
+
+  defp redact_resources(_policy, nil), do: nil
+
+  defp redact_resources(policy, resources) when is_list(resources),
+    do: Enum.map(resources, &redact_resource_details(policy, &1))
+
+  # The nested owner is a user: redact it by its own classification
+  # rather than nil-ing the whole struct.
+  defp redact_resource_details(policy, %OCSF.ResourceDetails{} = r) do
+    %{redact_struct(policy, r) | owner: redact_struct(policy, r.owner)}
+  end
 
   defp redact_actor(_policy, nil), do: nil
 

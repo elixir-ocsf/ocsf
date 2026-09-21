@@ -300,6 +300,34 @@ defmodule OCSF.DeserializerTest do
       assert restored.dst_endpoint.hostname == "dst.example.com"
     end
 
+    test "string-keyed resources are parsed into %OCSF.ResourceDetails{} with nested owner" do
+      event = %{
+        valid_event()
+        | resources: [
+            %OCSF.ResourceDetails{
+              uid: "arn:1",
+              labels: ["prod"],
+              owner: %OCSF.User{uid: "o1", org: %OCSF.Organization{uid: "acme"}},
+              group: %OCSF.Group{uid: "g1"},
+              data: %{"tier" => "gold"}
+            }
+          ]
+      }
+
+      string_map = event |> Jason.encode!() |> Jason.decode!()
+      assert {:ok, restored} = OCSF.Event.from_map(string_map)
+
+      assert [
+               %OCSF.ResourceDetails{
+                 uid: "arn:1",
+                 labels: ["prod"],
+                 owner: %OCSF.User{uid: "o1", org: %OCSF.Organization{uid: "acme"}},
+                 group: %OCSF.Group{uid: "g1"},
+                 data: %{"tier" => "gold"}
+               }
+             ] = restored.resources
+    end
+
     test "parses metadata with nil product (no feature)" do
       map =
         OCSF.to_map(valid_event())

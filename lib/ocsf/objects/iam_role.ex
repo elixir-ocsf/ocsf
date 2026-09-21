@@ -24,8 +24,8 @@ defmodule OCSF.IamRole do
     `:taxonomic`.
   - `:privileges` -- list of privilege strings granted by the role.
     Classified as `:taxonomic`.
-  - `:resources` -- list of resource identifiers the role grants access
-    to. Classified as `:taxonomic`.
+  - `:resources` -- list of `%OCSF.ResourceDetails{}` the role grants
+    access to. Classified as `:taxonomic`.
   - `:programmatic_credentials` -- list of programmatic credentials
     (access keys, tokens) bound to the role. Classified as `:credential`
     and always redacted.
@@ -54,7 +54,7 @@ defmodule OCSF.IamRole do
           uid_alt: String.t() | nil,
           policies: [term] | nil,
           privileges: [term] | nil,
-          resources: [term] | nil,
+          resources: [OCSF.ResourceDetails.t()] | nil,
           programmatic_credentials: [term] | nil,
           session: map | nil
         }

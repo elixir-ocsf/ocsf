@@ -126,6 +126,14 @@ defmodule OCSF.Events.GroupManagementTest do
       assert event.actor.user.uid == "admin-1"
       assert event.service.name == "scim"
     end
+
+    test "casts resources to %OCSF.ResourceDetails{} and keeps them schema-conformant" do
+      opts = Keyword.put(base_opts(), :resources, [%{name: "reports", type: "bucket"}])
+
+      assert {:ok, event} = GroupManagement.assign_privileges(opts)
+      assert [%OCSF.ResourceDetails{name: "reports", type: "bucket"}] = event.resources
+      assert {:ok, []} = SchemaValidator.validate_event(OCSF.to_map(event), @schema)
+    end
   end
 
   describe "OCSF schema conformance" do

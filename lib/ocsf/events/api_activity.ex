@@ -21,7 +21,11 @@ defmodule OCSF.Events.ApiActivity do
   > required fields for the API Activity class. Builders return
   > `{:error, _}` if any is omitted.
 
-  See `OCSF.Api`, `OCSF.Actor`, `OCSF.NetworkEndpoint`, `OCSF.Event`.
+  Optional `:resources` lists the `OCSF.ResourceDetails` affected by the
+  call.
+
+  See `OCSF.Api`, `OCSF.Actor`, `OCSF.NetworkEndpoint`,
+  `OCSF.ResourceDetails`, `OCSF.Event`.
   """
 
   @class_uid 6003
@@ -93,6 +97,7 @@ defmodule OCSF.Events.ApiActivity do
       api: opts[:api],
       actor: opts[:actor],
       user: opts[:user],
+      resources: opts[:resources],
       http_request: opts[:http_request],
       src_endpoint: opts[:src_endpoint],
       dst_endpoint: opts[:dst_endpoint],

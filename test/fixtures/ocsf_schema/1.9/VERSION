@@ -12,3 +12,4 @@ Files:
   - base_event.json
   - metadata.json (object)
   - user.json (object)
+  - resource_details.json (object, fetched 2026-09-21)

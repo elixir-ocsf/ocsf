@@ -38,8 +38,9 @@ defmodule OCSF.Event do
   - `:api` — `%OCSF.Api{} | nil`. Required for API Activity (6003).
   - `:privileges` — `[String.t()] | nil`. List of assigned/removed
     privileges.
-  - `:resources` — `[String.t()] | nil`. List of assigned/removed
-    resource identifiers (Role Management, 3008).
+  - `:resources` — `[OCSF.ResourceDetails.t()] | nil`. Resources
+    affected by, or granted through, the activity (Group Management 3006,
+    User Management 3007, Role Management 3008, API Activity 6003).
   - `:actor` — `%OCSF.Actor{} | nil`.
   - `:http_request` — `%OCSF.HttpRequest{} | nil`.
   - `:src_endpoint` — `%OCSF.NetworkEndpoint{} | nil`.
@@ -73,7 +74,7 @@ defmodule OCSF.Event do
           updated_role: OCSF.IamRole.t() | nil,
           api: OCSF.Api.t() | nil,
           privileges: [String.t()] | nil,
-          resources: [String.t()] | nil,
+          resources: [OCSF.ResourceDetails.t()] | nil,
           http_request: OCSF.HttpRequest.t() | nil,
           src_endpoint: OCSF.NetworkEndpoint.t() | nil,
           dst_endpoint: OCSF.NetworkEndpoint.t() | nil,
@@ -170,7 +171,7 @@ defmodule OCSF.Event do
       updated_role: cast_if(get_attr(attrs, :updated_role), OCSF.IamRole),
       api: cast_if(get_attr(attrs, :api), OCSF.Api),
       privileges: get_attr(attrs, :privileges),
-      resources: get_attr(attrs, :resources),
+      resources: cast_list_if(get_attr(attrs, :resources), OCSF.ResourceDetails),
       http_request: cast_if(get_attr(attrs, :http_request), OCSF.HttpRequest),
       src_endpoint: cast_if(get_attr(attrs, :src_endpoint), OCSF.NetworkEndpoint),
       dst_endpoint: cast_if(get_attr(attrs, :dst_endpoint), OCSF.NetworkEndpoint),
@@ -255,10 +256,20 @@ defmodule OCSF.Event do
     struct(mod, cast_nested(mod, casted))
   end
 
-  # Recursively cast the single nested object each parent struct carries.
+  # Recursively cast the nested objects each parent struct carries.
   defp cast_nested(OCSF.User, casted), do: maybe_cast(casted, :org, OCSF.Organization)
   defp cast_nested(OCSF.Actor, casted), do: maybe_cast(casted, :user, OCSF.User)
   defp cast_nested(OCSF.Api, casted), do: maybe_cast(casted, :service, OCSF.Service)
+
+  defp cast_nested(OCSF.IamRole, casted),
+    do: maybe_cast_list(casted, :resources, OCSF.ResourceDetails)
+
+  defp cast_nested(OCSF.ResourceDetails, casted) do
+    casted
+    |> maybe_cast(:owner, OCSF.User)
+    |> maybe_cast(:group, OCSF.Group)
+  end
+
   defp cast_nested(_mod, casted), do: casted
 
   defp maybe_cast(casted, key, mod) do
@@ -268,6 +279,13 @@ defmodule OCSF.Event do
       Map.put(casted, key, cast_if(val, mod))
     else
       casted
+    end
+  end
+
+  defp maybe_cast_list(casted, key, mod) do
+    case casted[key] do
+      list when is_list(list) -> Map.put(casted, key, cast_list_if(list, mod))
+      _ -> casted
     end
   end
 end
