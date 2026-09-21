@@ -94,5 +94,37 @@ defmodule OCSF.ValidateTest do
       event = %{valid_event() | user: nil}
       assert {:error, %OCSF.Error{reason: :missing, path: "user"}} = OCSF.validate(event)
     end
+
+    test "Authentication without service or dst_endpoint violates at_least_one" do
+      event = %{valid_event() | service: nil, dst_endpoint: nil}
+
+      assert {:error, %OCSF.Error{reason: :constraint_violated, path: "service|dst_endpoint"}} =
+               OCSF.validate(event)
+    end
+
+    test "required-field errors take precedence over constraint errors" do
+      event = %{valid_event() | user: nil, service: nil}
+      assert {:error, %OCSF.Error{reason: :missing, path: "user"}} = OCSF.validate(event)
+    end
+
+    test "Authorize Session needs privileges, groups or iam_roles" do
+      base = %{valid_event() | class_uid: 3003, type_uid: 300_301, service: nil}
+
+      assert {:error,
+              %OCSF.Error{reason: :constraint_violated, path: "privileges|groups|iam_roles"}} =
+               OCSF.validate(base)
+
+      assert {:ok, _} = OCSF.validate(%{base | privileges: ["p"]})
+      assert {:ok, _} = OCSF.validate(%{base | groups: [%OCSF.Group{uid: "g1"}]})
+      assert {:ok, _} = OCSF.validate(%{base | iam_roles: [%OCSF.IamRole{uid: "r1"}]})
+
+      assert {:error, %OCSF.Error{reason: :constraint_violated}} =
+               OCSF.validate(%{base | groups: []})
+    end
+
+    test "classes without constraints are unaffected" do
+      event = %{valid_event() | class_uid: 3007, type_uid: 300_701, service: nil}
+      assert {:ok, _} = OCSF.validate(event)
+    end
   end
 end

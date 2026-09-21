@@ -19,7 +19,8 @@ defmodule OCSF.Events.AuthorizeSession do
   > **OCSF compliance note:** `user` is a required field for the
   > Authorize Session class. Builders return `{:error, _}` if omitted.
   > OCSF also requires at least one of `privileges`, `groups`, or
-  > `iam_roles`; pass the one relevant to the activity.
+  > `iam_roles`; builders return `{:error, %{reason: :constraint_violated}}`
+  > when none is given. Pass the one relevant to the activity.
 
   See `OCSF.User`, `OCSF.Group`, `OCSF.IamRole`, `OCSF.Event`,
   `OCSF.Activity`.
@@ -99,7 +100,6 @@ defmodule OCSF.Events.AuthorizeSession do
       http_request: opts[:http_request],
       src_endpoint: opts[:src_endpoint],
       dst_endpoint: opts[:dst_endpoint],
-      service: opts[:service],
       raw_data: opts[:raw_data],
       unmapped: opts[:unmapped]
     }

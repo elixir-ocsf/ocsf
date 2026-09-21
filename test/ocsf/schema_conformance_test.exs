@@ -153,20 +153,22 @@ defmodule OCSF.SchemaConformanceTest do
 
   describe "constraints" do
     test "at_least_one constraint requires service or dst_endpoint" do
-      {:ok, event} = Authentication.logon(user: %{uid: "u1"})
-      event_map = OCSF.to_map(event)
+      # The builder enforces the schema constraint up front.
+      assert {:error, %OCSF.Error{reason: :constraint_violated}} =
+               Authentication.logon(user: %{uid: "u1"})
 
-      # Without service or dst_endpoint, constraint is violated
-      result = SchemaValidator.validate_event(event_map, @schema)
+      # The vendored schema validator flags the same gap on a raw map.
+      {:ok, event} = Authentication.logon(user: %{uid: "u1"}, service: %{name: "svc"})
+      event_map = event |> OCSF.to_map() |> Map.delete(:service)
+      assert {:error, errors} = SchemaValidator.validate_event(event_map, @schema)
+      assert Enum.any?(errors, &String.contains?(&1, "at least one"))
+    end
 
-      case result do
-        {:error, errors} ->
-          assert Enum.any?(errors, &String.contains?(&1, "at least one"))
+    test "the vendored constraints match what validate/1 enforces" do
+      assert %{"at_least_one" => ["service", "dst_endpoint"]} = @schema["constraints"]
 
-        {:ok, []} ->
-          # If the builder auto-sets one, that's fine too
-          assert Map.has_key?(event_map, :service) or Map.has_key?(event_map, :dst_endpoint)
-      end
+      assert %{"at_least_one" => ["privileges", "groups", "iam_roles"]} =
+               SchemaValidator.load_class_schema("authorize_session")["constraints"]
     end
   end
 end

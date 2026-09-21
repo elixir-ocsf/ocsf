@@ -130,7 +130,7 @@ defmodule OCSF.Events.RoleManagementTest do
       assert event.severity_id == 1
     end
 
-    test "passes optional actor, service, and status_detail through" do
+    test "passes optional actor and status_detail through, ignores service" do
       opts =
         base_opts()
         |> Keyword.put(:actor, %Actor{user: %User{uid: "admin-1"}})
@@ -139,7 +139,8 @@ defmodule OCSF.Events.RoleManagementTest do
 
       assert {:ok, event} = RoleManagement.attach_policies(opts)
       assert event.actor.user.uid == "admin-1"
-      assert event.service.name == "idp"
+      # Role Management (3008) defines no top-level service attribute.
+      assert event.service == nil
       assert event.status_detail == "iac_apply"
     end
   end

@@ -15,7 +15,9 @@ defmodule OCSF.EventFixtures do
       activity_id: 1,
       severity_id: 1,
       status_id: 1,
-      user: %OCSF.User{uid: "test-user"}
+      user: %OCSF.User{uid: "test-user"},
+      # Authentication (3002) requires at least one of service/dst_endpoint.
+      service: %OCSF.Service{name: "Test Auth"}
     ]
   end
 

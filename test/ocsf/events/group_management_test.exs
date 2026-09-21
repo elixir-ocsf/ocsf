@@ -116,7 +116,7 @@ defmodule OCSF.Events.GroupManagementTest do
       assert event.unmapped == %{"k" => "v"}
     end
 
-    test "passes optional actor and service through" do
+    test "passes optional actor through, ignores service" do
       opts =
         base_opts()
         |> Keyword.put(:actor, %Actor{user: %User{uid: "admin-1"}})
@@ -124,7 +124,8 @@ defmodule OCSF.Events.GroupManagementTest do
 
       assert {:ok, event} = GroupManagement.create(opts)
       assert event.actor.user.uid == "admin-1"
-      assert event.service.name == "scim"
+      # Group Management (3006) defines no top-level service attribute.
+      assert event.service == nil
     end
 
     test "casts resources to %OCSF.ResourceDetails{} and keeps them schema-conformant" do

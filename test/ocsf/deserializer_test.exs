@@ -83,7 +83,14 @@ defmodule OCSF.DeserializerTest do
     end
 
     test "nil service remains nil" do
-      map = OCSF.to_map(valid_event())
+      # dst_endpoint keeps the 3002 at_least_one constraint satisfied.
+      event = %{
+        valid_event()
+        | service: nil,
+          dst_endpoint: %OCSF.NetworkEndpoint{hostname: "auth.example.com"}
+      }
+
+      map = OCSF.to_map(event)
       refute Map.has_key?(map, :service)
       assert {:ok, restored} = OCSF.Event.from_map(map)
       assert restored.service == nil

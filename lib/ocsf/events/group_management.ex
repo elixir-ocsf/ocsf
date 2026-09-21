@@ -127,7 +127,6 @@ defmodule OCSF.Events.GroupManagement do
       http_request: opts[:http_request],
       src_endpoint: opts[:src_endpoint],
       dst_endpoint: opts[:dst_endpoint],
-      service: opts[:service],
       raw_data: opts[:raw_data],
       unmapped: opts[:unmapped]
     }

@@ -17,7 +17,9 @@ defmodule OCSF.Events.Authentication do
   | `account_switch/1`       | 7           | Account Switch       |
 
   > **OCSF compliance note:** `user` is a required field for the
-  > Authentication class. Builders return `{:error, _}` if omitted.
+  > Authentication class, and OCSF requires at least one of `service`
+  > or `dst_endpoint`. Builders return `{:error, _}` (reason `:missing`
+  > or `:constraint_violated`) when either rule is not met.
 
   See `OCSF.Event`, `OCSF.Activity`, `OCSF.EventCodeFormat`.
   """

@@ -19,6 +19,8 @@ defmodule OCSF.Events.AuthorizeSessionTest do
   defp base_opts do
     [
       user: %User{uid: "u1"},
+      # OCSF requires at least one of privileges/groups/iam_roles.
+      privileges: ["read:reports"],
       severity: :Informational,
       status: :Success,
       metadata: %{product: %Product{name: "Test"}}
@@ -65,6 +67,43 @@ defmodule OCSF.Events.AuthorizeSessionTest do
       opts = Keyword.put(base_opts(), :user, %{uid: "u9"})
       assert {:ok, event} = AuthorizeSession.assign_privileges(opts)
       assert %User{uid: "u9"} = event.user
+    end
+  end
+
+  describe "at_least_one constraint (privileges | groups | iam_roles)" do
+    test "returns {:error, :constraint_violated} when none is given" do
+      opts = Keyword.delete(base_opts(), :privileges)
+
+      assert {:error,
+              %Error{
+                reason: :constraint_violated,
+                path: "privileges|groups|iam_roles",
+                details: %{at_least_one: [:privileges, :groups, :iam_roles], class_uid: 3003}
+              }} = AuthorizeSession.assign_privileges(opts)
+    end
+
+    test "an empty list counts as absent" do
+      opts = Keyword.put(base_opts(), :privileges, [])
+
+      assert {:error, %Error{reason: :constraint_violated}} =
+               AuthorizeSession.assign_privileges(opts)
+    end
+
+    test "the singular group does not satisfy the constraint" do
+      opts = base_opts() |> Keyword.delete(:privileges) |> Keyword.put(:group, %Group{uid: "g1"})
+
+      assert {:error, %Error{reason: :constraint_violated}} =
+               AuthorizeSession.assign_groups(opts)
+    end
+
+    test "groups alone or iam_roles alone satisfy the constraint" do
+      without = Keyword.delete(base_opts(), :privileges)
+
+      assert {:ok, _} =
+               AuthorizeSession.assign_groups(Keyword.put(without, :groups, [%{uid: "g1"}]))
+
+      assert {:ok, _} =
+               AuthorizeSession.assign_roles(Keyword.put(without, :iam_roles, [%{uid: "r1"}]))
     end
   end
 
@@ -171,7 +210,12 @@ defmodule OCSF.Events.AuthorizeSessionTest do
     end
 
     test "empty privileges list is omitted from the serialized map" do
-      {:ok, event} = AuthorizeSession.assign_privileges(Keyword.put(base_opts(), :privileges, []))
+      opts =
+        base_opts()
+        |> Keyword.put(:privileges, [])
+        |> Keyword.put(:groups, [%Group{uid: "g1"}])
+
+      {:ok, event} = AuthorizeSession.assign_groups(opts)
       refute Map.has_key?(OCSF.to_map(event), :privileges)
     end
   end
@@ -179,7 +223,10 @@ defmodule OCSF.Events.AuthorizeSessionTest do
   describe "redaction" do
     test "deny policy nils PII fields on the user" do
       {:ok, event} =
-        AuthorizeSession.assign_privileges(user: %{uid: "u1", email_addr: "jane@test.com"})
+        AuthorizeSession.assign_privileges(
+          user: %{uid: "u1", email_addr: "jane@test.com"},
+          privileges: ["read"]
+        )
 
       redacted = OCSF.redact(event, %Policy{deny: [:contact]})
       assert redacted.user.email_addr == nil

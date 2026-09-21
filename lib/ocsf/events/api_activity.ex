@@ -22,7 +22,8 @@ defmodule OCSF.Events.ApiActivity do
   > `{:error, _}` if any is omitted.
 
   Optional `:resources` lists the `OCSF.ResourceDetails` affected by the
-  call.
+  call. The class defines no top-level `user` or `service`: the caller
+  goes in `actor.user` and the called service in `api.service`.
 
   See `OCSF.Api`, `OCSF.Actor`, `OCSF.NetworkEndpoint`,
   `OCSF.ResourceDetails`, `OCSF.Event`.
@@ -96,12 +97,10 @@ defmodule OCSF.Events.ApiActivity do
       status_detail: opts[:status_detail],
       api: opts[:api],
       actor: opts[:actor],
-      user: opts[:user],
       resources: opts[:resources],
       http_request: opts[:http_request],
       src_endpoint: opts[:src_endpoint],
       dst_endpoint: opts[:dst_endpoint],
-      service: opts[:service],
       raw_data: opts[:raw_data],
       unmapped: opts[:unmapped]
     }

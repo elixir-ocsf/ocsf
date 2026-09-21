@@ -82,7 +82,8 @@ defmodule OCSF do
          :ok <- check_status_detail(event),
          :ok <- check_severity(event),
          :ok <- check_time(event),
-         :ok <- check_class_required_fields(event) do
+         :ok <- check_class_required_fields(event),
+         :ok <- check_class_constraints(event) do
       {:ok, event}
     end
   end
@@ -205,4 +206,33 @@ defmodule OCSF do
        OCSF.Error.new(:missing, "group", %{reason: "required for Group Management (3006)"})}
 
   defp check_class_required_fields(_), do: :ok
+
+  # OCSF `at_least_one` class constraints. `nil` and `[]` both count as
+  # absent, matching the serializer, which omits empty lists.
+  @class_constraints %{
+    3002 => [:service, :dst_endpoint],
+    3003 => [:privileges, :groups, :iam_roles]
+  }
+
+  defp check_class_constraints(%{class_uid: class_uid} = event) do
+    case Map.fetch(@class_constraints, class_uid) do
+      {:ok, fields} ->
+        if Enum.any?(fields, &present?(Map.get(event, &1))) do
+          :ok
+        else
+          {:error,
+           OCSF.Error.new(:constraint_violated, Enum.join(fields, "|"), %{
+             at_least_one: fields,
+             class_uid: class_uid
+           })}
+        end
+
+      :error ->
+        :ok
+    end
+  end
+
+  defp present?(nil), do: false
+  defp present?([]), do: false
+  defp present?(_), do: true
 end

@@ -21,8 +21,10 @@ defmodule OCSF.Events.EntityManagement do
 
   > **OCSF compliance note:** `entity` is a required field for the
   > Entity Management class. Builders return `{:error, _}` if omitted.
+  > The class defines no top-level `user` or `service`: identify the
+  > caller through `actor.user`.
 
-  See `OCSF.Entity`, `OCSF.Event`, `OCSF.Activity`.
+  See `OCSF.Entity`, `OCSF.Actor`, `OCSF.Event`, `OCSF.Activity`.
   """
 
   @class_uid 3004
@@ -101,11 +103,9 @@ defmodule OCSF.Events.EntityManagement do
       status_detail: opts[:status_detail],
       entity: opts[:entity],
       actor: opts[:actor],
-      user: opts[:user],
       http_request: opts[:http_request],
       src_endpoint: opts[:src_endpoint],
       dst_endpoint: opts[:dst_endpoint],
-      service: opts[:service],
       raw_data: opts[:raw_data],
       unmapped: opts[:unmapped]
     }

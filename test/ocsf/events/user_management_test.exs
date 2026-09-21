@@ -125,7 +125,7 @@ defmodule OCSF.Events.UserManagementTest do
       end)
     end
 
-    test "passes optional actor, service, and status_detail through" do
+    test "passes optional actor and status_detail through, ignores service" do
       opts =
         base_opts()
         |> Keyword.put(:actor, %Actor{user: %User{uid: "admin-1"}})
@@ -134,7 +134,8 @@ defmodule OCSF.Events.UserManagementTest do
 
       assert {:ok, event} = UserManagement.password_reset(opts)
       assert event.actor.user.uid == "admin-1"
-      assert event.service.name == "idp"
+      # User Management (3007) defines no top-level service attribute.
+      assert event.service == nil
       assert event.status_detail == "admin_initiated"
     end
 

@@ -48,7 +48,6 @@ defmodule OCSF.SerializerTest do
       refute Map.has_key?(map, :http_request)
       refute Map.has_key?(map, :src_endpoint)
       refute Map.has_key?(map, :dst_endpoint)
-      refute Map.has_key?(map, :service)
       refute Map.has_key?(map, :raw_data)
       refute Map.has_key?(map, :unmapped)
       refute Map.has_key?(map, :status_detail)

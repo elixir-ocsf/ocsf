@@ -8,10 +8,12 @@ defmodule OCSF.Error do
 
   ## Fields
 
-  - `:reason` — atom describing the failure (e.g. `:invalid`, `:missing`,
-    `:type_mismatch`).
+  - `:reason` — atom describing the failure: `:invalid`, `:missing`,
+    `:type_mismatch`, or `:constraint_violated` (an OCSF `at_least_one`
+    class constraint, e.g. `service` or `dst_endpoint` on Authentication).
   - `:path` — dotted string pointing at the problematic field
-    (e.g. `"user.org.uid"`, `"metadata.version"`).
+    (e.g. `"user.org.uid"`, `"metadata.version"`). For a constraint the
+    candidate fields are joined with `|` (e.g. `"service|dst_endpoint"`).
   - `:details` — map with additional context (expected values, actual
     value, etc.).
 
