@@ -89,26 +89,25 @@ defmodule OCSFTest do
       assert {:error, %OCSF.Error{reason: :missing, path: "metadata.uid"}} = OCSF.validate(event)
     end
 
-    test "returns {:error, _} for missing metadata.version" do
-      event = put_in(valid_event().metadata.version, nil)
-
-      assert {:error, %OCSF.Error{reason: :invalid, path: "metadata.version"}} =
-               OCSF.validate(event)
-    end
-
     test "returns {:error, _} for invalid class_uid" do
       event = %{valid_event() | class_uid: 9999}
 
       assert {:error, %OCSF.Error{reason: :invalid, path: "class_uid"}} = OCSF.validate(event)
     end
 
-    test "returns {:error, _} for metadata without version key" do
-      # Construct event with metadata as a plain map lacking :version key
+    test "returns {:error, _} for metadata without a version" do
       event = valid_event()
-      # Replace metadata with a map that has uid but no version key
-      event = %{event | metadata: %{uid: "test-uid", product: %OCSF.Product{name: "Test"}}}
+      event = put_in(event.metadata.version, nil)
 
       assert {:error, %OCSF.Error{reason: :missing, path: "metadata.version"}} =
+               OCSF.validate(event)
+    end
+
+    test "returns {:error, :type_mismatch} for metadata given as a plain map" do
+      event = valid_event()
+      event = %{event | metadata: %{uid: "test-uid", product: %OCSF.Product{name: "Test"}}}
+
+      assert {:error, %OCSF.Error{reason: :type_mismatch, path: "metadata"}} =
                OCSF.validate(event)
     end
 

@@ -196,8 +196,11 @@ defmodule OCSF.Event do
   @spec from_map(map) :: {:ok, t} | {:error, OCSF.Error.t()}
   def from_map(map) when is_map(map), do: OCSF.Deserializer.from_map(map)
 
+  # Values that are neither nil, a struct nor a map are kept as-is so that
+  # `OCSF.validate/1` reports a `:type_mismatch` instead of this module
+  # raising on malformed input.
   defp cast_metadata(%OCSF.Metadata{} = m), do: m
-  defp cast_metadata(nil), do: nil
+  defp cast_metadata(m) when not is_map(m), do: m
 
   defp cast_metadata(%{} = m) do
     %OCSF.Metadata{
@@ -213,7 +216,7 @@ defmodule OCSF.Event do
   end
 
   defp cast_product(%OCSF.Product{} = p), do: p
-  defp cast_product(nil), do: nil
+  defp cast_product(p) when not is_map(p), do: p
 
   defp cast_product(%{} = p) do
     %OCSF.Product{
@@ -226,7 +229,7 @@ defmodule OCSF.Event do
   end
 
   defp cast_feature(%OCSF.Feature{} = f), do: f
-  defp cast_feature(nil), do: nil
+  defp cast_feature(f) when not is_map(f), do: f
 
   defp cast_feature(%{} = f) do
     %OCSF.Feature{
@@ -238,11 +241,11 @@ defmodule OCSF.Event do
 
   defp get_attr(map, key), do: map[key] || map[to_string(key)]
 
-  defp cast_list_if(nil, _mod), do: nil
   defp cast_list_if(list, mod) when is_list(list), do: Enum.map(list, &cast_if(&1, mod))
+  defp cast_list_if(val, _mod), do: val
 
-  defp cast_if(nil, _mod), do: nil
   defp cast_if(%{__struct__: mod} = s, mod), do: s
+  defp cast_if(val, _mod) when not is_map(val), do: val
 
   defp cast_if(%{} = m, mod) do
     fields = mod.__struct__() |> Map.from_struct() |> Map.keys()

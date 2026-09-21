@@ -14,7 +14,10 @@ defmodule OCSF.Deserializer do
   Reconstruct an `%OCSF.Event{}` from a nested OCSF map.
 
   Accepts both atom-keyed and string-keyed maps (e.g. from
-  `Jason.decode!/1`). Runs `OCSF.validate/1` after construction.
+  `Jason.decode!/1`). Runs `OCSF.validate/1` after construction, so a
+  malformed payload (an object where a list is expected, a string where
+  an object is expected, an unsupported `metadata.version`) returns
+  `{:error, %OCSF.Error{}}` rather than raising.
   """
   @spec from_map(map) :: {:ok, OCSF.Event.t()} | {:error, OCSF.Error.t()}
   def from_map(map) when is_map(map) do
@@ -54,7 +57,9 @@ defmodule OCSF.Deserializer do
     end
   end
 
-  defp parse_metadata(nil), do: nil
+  # Wrongly-typed nested values are passed through untouched so that
+  # `OCSF.validate/1` reports them as `:type_mismatch` instead of raising.
+  defp parse_metadata(m) when not is_map(m), do: m
 
   defp parse_metadata(m) do
     %OCSF.Metadata{
@@ -210,11 +215,11 @@ defmodule OCSF.Deserializer do
     end
   end
 
-  defp parse_if(nil, _fun), do: nil
-  defp parse_if(val, fun), do: fun.(val)
+  defp parse_if(val, fun) when is_map(val), do: fun.(val)
+  defp parse_if(val, _fun), do: val
 
-  defp parse_list_if(nil, _fun), do: nil
-  defp parse_list_if(list, fun) when is_list(list), do: Enum.map(list, fun)
+  defp parse_list_if(list, fun) when is_list(list), do: Enum.map(list, &parse_if(&1, fun))
+  defp parse_list_if(val, _fun), do: val
 
   defp get(map, key) when is_atom(key) do
     Map.get(map, key) || Map.get(map, Atom.to_string(key))

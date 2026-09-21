@@ -62,16 +62,19 @@ defmodule OCSF do
   @doc """
   Validate an `%OCSF.Event{}` structurally.
 
-  Runs a 12-step check (SPEC §10): metadata presence, version, product,
-  category/class/type consistency, activity/status/severity validity,
-  time format, and class-specific required fields.
+  Runs the SPEC §10 checks in order: nested object types, metadata
+  presence, supported version, product, category/class/type consistency,
+  activity/status/severity validity, time format, class-specific
+  required fields, and the class `at_least_one` constraints.
 
   Returns `{:ok, event}` on success or `{:error, %OCSF.Error{}}` on
-  the first failure.
+  the first failure (reasons `:type_mismatch`, `:missing`, `:invalid`,
+  `:constraint_violated`).
   """
   @spec validate(OCSF.Event.t()) :: {:ok, OCSF.Event.t()} | {:error, OCSF.Error.t()}
   def validate(%OCSF.Event{} = event) do
-    with :ok <- check_metadata_uid(event),
+    with :ok <- check_object_types(event),
+         :ok <- check_metadata_uid(event),
          :ok <- check_metadata_version(event),
          :ok <- check_metadata_product(event),
          :ok <- check_category(event),
@@ -88,15 +91,86 @@ defmodule OCSF do
     end
   end
 
+  # Expected struct (or list element type) of every nested field, at the
+  # event level and inside each object. Malformed input is kept as-is by
+  # `OCSF.Event.new/1` and `OCSF.Deserializer.from_map/1`; this is where
+  # it is reported instead of raising later in the serializer.
+  @event_object_types [
+    metadata: OCSF.Metadata,
+    actor: OCSF.Actor,
+    user: OCSF.User,
+    updated_user: OCSF.User,
+    entity: OCSF.Entity,
+    group: OCSF.Group,
+    groups: {:list, OCSF.Group},
+    iam_role: OCSF.IamRole,
+    iam_roles: {:list, OCSF.IamRole},
+    updated_role: OCSF.IamRole,
+    api: OCSF.Api,
+    privileges: {:list, :string},
+    resources: {:list, OCSF.ResourceDetails},
+    http_request: OCSF.HttpRequest,
+    src_endpoint: OCSF.NetworkEndpoint,
+    dst_endpoint: OCSF.NetworkEndpoint,
+    service: OCSF.Service
+  ]
+
+  @nested_object_types %{
+    OCSF.Metadata => [product: OCSF.Product],
+    OCSF.Product => [feature: OCSF.Feature],
+    OCSF.User => [org: OCSF.Organization],
+    OCSF.Actor => [user: OCSF.User],
+    OCSF.Api => [service: OCSF.Service],
+    OCSF.IamRole => [resources: {:list, OCSF.ResourceDetails}],
+    OCSF.ResourceDetails => [owner: OCSF.User, group: OCSF.Group]
+  }
+
+  defp check_object_types(event), do: check_typed_fields(event, @event_object_types, "")
+
+  defp check_typed_fields(container, specs, prefix) do
+    Enum.reduce_while(specs, :ok, fn {field, spec}, :ok ->
+      case check_typed_value(Map.get(container, field), spec, prefix <> Atom.to_string(field)) do
+        :ok -> {:cont, :ok}
+        error -> {:halt, error}
+      end
+    end)
+  end
+
+  defp check_typed_value(nil, _spec, _path), do: :ok
+
+  defp check_typed_value(list, {:list, spec}, path) when is_list(list) do
+    list
+    |> Enum.with_index()
+    |> Enum.reduce_while(:ok, fn {item, i}, :ok ->
+      case check_typed_value(item, spec, "#{path}[#{i}]") do
+        :ok -> {:cont, :ok}
+        error -> {:halt, error}
+      end
+    end)
+  end
+
+  defp check_typed_value(value, {:list, _spec}, path), do: type_mismatch(path, "list", value)
+  defp check_typed_value(value, :string, _path) when is_binary(value), do: :ok
+  defp check_typed_value(value, :string, path), do: type_mismatch(path, "String.t()", value)
+
+  defp check_typed_value(%mod{} = struct, mod, path),
+    do: check_typed_fields(struct, Map.get(@nested_object_types, mod, []), path <> ".")
+
+  defp check_typed_value(value, mod, path), do: type_mismatch(path, "%#{inspect(mod)}{}", value)
+
+  defp type_mismatch(path, expected, value),
+    do: {:error, OCSF.Error.new(:type_mismatch, path, %{expected: expected, got: value})}
+
   defp check_metadata_uid(%{metadata: %{uid: uid}}) when is_binary(uid) and uid != "", do: :ok
   defp check_metadata_uid(_), do: {:error, OCSF.Error.new(:missing, "metadata.uid")}
+
+  defp check_metadata_version(%{metadata: %{version: nil}}),
+    do: {:error, OCSF.Error.new(:missing, "metadata.version")}
 
   defp check_metadata_version(%{metadata: %{version: v}}) when v == @ocsf_version, do: :ok
 
   defp check_metadata_version(%{metadata: %{version: v}}),
     do: {:error, OCSF.Error.new(:invalid, "metadata.version", %{expected: @ocsf_version, got: v})}
-
-  defp check_metadata_version(_), do: {:error, OCSF.Error.new(:missing, "metadata.version")}
 
   defp check_metadata_product(%{metadata: %{product: %OCSF.Product{}}}), do: :ok
   defp check_metadata_product(_), do: {:error, OCSF.Error.new(:missing, "metadata.product")}

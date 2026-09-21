@@ -122,6 +122,41 @@ defmodule OCSF.ValidateTest do
                OCSF.validate(%{base | groups: []})
     end
 
+    test "a non-struct nested object fails with :type_mismatch" do
+      event = %{valid_event() | user: %{uid: "u1"}}
+
+      assert {:error, %OCSF.Error{reason: :type_mismatch, path: "user", details: details}} =
+               OCSF.validate(event)
+
+      assert details.expected == "%OCSF.User{}"
+    end
+
+    test "a wrong struct in a nested object fails with :type_mismatch" do
+      event = %{valid_event() | actor: %OCSF.Actor{user: %OCSF.Group{uid: "g1"}}}
+
+      assert {:error, %OCSF.Error{reason: :type_mismatch, path: "actor.user"}} =
+               OCSF.validate(event)
+    end
+
+    test "list fields must be lists of the right struct" do
+      event = %{valid_event() | iam_roles: %OCSF.IamRole{uid: "r1"}}
+
+      assert {:error, %OCSF.Error{reason: :type_mismatch, path: "iam_roles"}} =
+               OCSF.validate(event)
+
+      event = %{valid_event() | iam_roles: [%OCSF.IamRole{uid: "r1", resources: ["arn:1"]}]}
+
+      assert {:error, %OCSF.Error{reason: :type_mismatch, path: "iam_roles[0].resources[0]"}} =
+               OCSF.validate(event)
+    end
+
+    test "type checks run before the metadata checks" do
+      event = %{valid_event() | metadata: "1.9.0"}
+
+      assert {:error, %OCSF.Error{reason: :type_mismatch, path: "metadata"}} =
+               OCSF.validate(event)
+    end
+
     test "classes without constraints are unaffected" do
       event = %{valid_event() | class_uid: 3007, type_uid: 300_701, service: nil}
       assert {:ok, _} = OCSF.validate(event)

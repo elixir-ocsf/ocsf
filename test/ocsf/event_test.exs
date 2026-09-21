@@ -68,6 +68,20 @@ defmodule OCSF.EventTest do
       assert %OCSF.NetworkEndpoint{hostname: "host.local"} = event.dst_endpoint
     end
 
+    test "malformed nested values are kept as-is for validate/1 to report" do
+      attrs =
+        valid_attrs()
+        |> Keyword.put(:user, "not-a-map")
+        |> Keyword.put(:groups, %{uid: "g1"})
+        |> Keyword.put(:metadata, 42)
+
+      assert {:ok, event} = OCSF.Event.new(attrs)
+      assert event.user == "not-a-map"
+      assert event.groups == %{uid: "g1"}
+      assert event.metadata == 42
+      assert {:error, %OCSF.Error{reason: :type_mismatch}} = OCSF.validate(event)
+    end
+
     test "cast_if passes through already-struct values" do
       user = %OCSF.User{uid: "u1", name: "Alice"}
       attrs = Keyword.put(valid_attrs(), :user, user)
