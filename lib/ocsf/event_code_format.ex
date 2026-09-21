@@ -57,6 +57,24 @@ defmodule OCSF.EventCodeFormat do
 
   @doc """
   Return the configured default format name, or `nil`.
+
+  Read from `config :ocsf, :event_code, default_format: name`. The
+  builders fall back to this format when neither `:event_code` nor
+  `:event_code_format` is given.
+
+  ## Examples
+
+      # config/config.exs
+      config :ocsf, :event_code,
+        default_format: :cryptr,
+        formats: %{cryptr: %{fields: [[:class_name], [:activity_name]], separator: ":"}}
+
+      OCSF.EventCodeFormat.default_format()
+      #=> :cryptr
+
+      # Without configuration
+      OCSF.EventCodeFormat.default_format()
+      #=> nil
   """
   @spec default_format() :: atom | nil
   def default_format do

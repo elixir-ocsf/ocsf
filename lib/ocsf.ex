@@ -59,12 +59,42 @@ defmodule OCSF do
   corresponding `_name` labels are added alongside per OCSF convention.
 
   Delegates to `OCSF.Serializer.to_map/1`.
+
+  ## Examples
+
+      {:ok, event} =
+        OCSF.Events.Authentication.logon(
+          user: %{uid: "u1"},
+          service: %{name: "Cryptr Auth"},
+          status: :Success
+        )
+
+      map = OCSF.to_map(event)
+      map.class_uid
+      #=> 3002
+      map.class_name
+      #=> "Authentication"
+      Map.has_key?(map, :dst_endpoint)
+      #=> false
   """
   @spec to_map(OCSF.Event.t()) :: map
   def to_map(%OCSF.Event{} = event), do: OCSF.Serializer.to_map(event)
 
   @doc """
   Serialize an `%OCSF.Event{}` to OCSF-compliant JSON iodata.
+
+  Equivalent to `event |> OCSF.to_map() |> Jason.encode_to_iodata!()`.
+
+  ## Examples
+
+      {:ok, event} =
+        OCSF.Events.Authentication.logon(
+          user: %{uid: "u1"},
+          service: %{name: "Cryptr Auth"}
+        )
+
+      event |> OCSF.to_json() |> IO.iodata_to_binary() |> Jason.decode!()
+      #=> %{"class_uid" => 3002, "class_name" => "Authentication", ...}
   """
   @spec to_json(OCSF.Event.t()) :: iodata
   def to_json(%OCSF.Event{} = event), do: event |> to_map() |> Jason.encode_to_iodata!()
@@ -72,7 +102,23 @@ defmodule OCSF do
   @doc """
   Reconstruct an `%OCSF.Event{}` from a nested OCSF map.
 
+  Accepts atom- or string-keyed maps and runs `validate/1` on the
+  result, so `event |> OCSF.to_map() |> OCSF.from_map()` round-trips.
+
   Delegates to `OCSF.Event.from_map/1`.
+
+  ## Examples
+
+      {:ok, event} =
+        OCSF.Events.Authentication.logon(
+          user: %{uid: "u1"},
+          service: %{name: "Cryptr Auth"}
+        )
+
+      {:ok, ^event} = event |> OCSF.to_map() |> OCSF.from_map()
+
+      OCSF.from_map(%{"class_uid" => 3002})
+      #=> {:error, %OCSF.Error{reason: :missing, path: "metadata.uid", details: %{}}}
   """
   @spec from_map(map) :: {:ok, OCSF.Event.t()} | {:error, OCSF.Error.t()}
   def from_map(map) when is_map(map), do: OCSF.Event.from_map(map)
@@ -81,6 +127,18 @@ defmodule OCSF do
   Apply a sink **policy** to an event, returning a **redacted** event.
 
   Delegates to `OCSF.Policy.apply/2`.
+
+  ## Examples
+
+      {:ok, event} =
+        OCSF.Events.Authentication.logon(
+          user: %{uid: "u1", name: "Jane", email_addr: "jane@example.com"},
+          service: %{name: "Cryptr Auth"}
+        )
+
+      redacted = OCSF.redact(event, %OCSF.Policy{deny: [:contact, :identity]})
+      redacted.user
+      #=> %OCSF.User{uid: "u1", name: nil, email_addr: nil, org: nil, type_id: nil}
   """
   @spec redact(OCSF.Event.t(), OCSF.Policy.t()) :: OCSF.Event.t()
   def redact(%OCSF.Event{} = event, %OCSF.Policy{} = policy),
@@ -97,6 +155,37 @@ defmodule OCSF do
   Returns `{:ok, event}` on success or `{:error, %OCSF.Error{}}` on
   the first failure (reasons `:type_mismatch`, `:missing`, `:invalid`,
   `:constraint_violated`).
+
+  The builders call this for you; call it directly on events assembled
+  with `OCSF.Event.new/1`.
+
+  ## Examples
+
+      iex> {:ok, event} =
+      ...>   OCSF.Event.new(
+      ...>     metadata: %OCSF.Metadata{
+      ...>       uid: "018f1a03-2a8f-7b40-9e12-b7aa47bd0c01",
+      ...>       version: "1.9.0",
+      ...>       product: %OCSF.Product{name: "Cryptr"}
+      ...>     },
+      ...>     time: ~U[2026-04-15 10:00:00Z],
+      ...>     category_uid: 3,
+      ...>     class_uid: 3002,
+      ...>     type_uid: 300_201,
+      ...>     activity_id: 1,
+      ...>     severity_id: 1,
+      ...>     status_id: 1,
+      ...>     user: %{uid: "u1"},
+      ...>     service: %{name: "Cryptr Auth"}
+      ...>   )
+      iex> {:ok, _valid} = OCSF.validate(event)
+      iex> OCSF.validate(%{event | service: nil})
+      {:error,
+       %OCSF.Error{
+         reason: :constraint_violated,
+         path: "service|dst_endpoint",
+         details: %{at_least_one: [:service, :dst_endpoint], class_uid: 3002}
+       }}
   """
   @spec validate(OCSF.Event.t()) :: {:ok, OCSF.Event.t()} | {:error, OCSF.Error.t()}
   def validate(%OCSF.Event{} = event) do

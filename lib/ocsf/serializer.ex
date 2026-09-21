@@ -15,7 +15,29 @@ defmodule OCSF.Serializer do
   Convert an `%OCSF.Event{}` to an OCSF-compliant nested map.
 
   Nil fields are omitted. Integer UIDs are emitted as-is; their
-  corresponding `_name` labels are added alongside.
+  corresponding `_name` labels are added alongside. Empty lists are
+  omitted too, so `privileges: []` never reaches the sink.
+
+  ## Examples
+
+      iex> {:ok, event} =
+      ...>   OCSF.Event.new(
+      ...>     metadata: %OCSF.Metadata{uid: "m1", version: "1.9.0"},
+      ...>     time: ~U[2026-04-15 10:00:00Z],
+      ...>     category_uid: 3,
+      ...>     class_uid: 3003,
+      ...>     type_uid: 300_301,
+      ...>     activity_id: 1,
+      ...>     severity_id: 1,
+      ...>     status_id: 1,
+      ...>     user: %{uid: "u1"},
+      ...>     privileges: []
+      ...>   )
+      iex> map = OCSF.Serializer.to_map(event)
+      iex> {map.class_name, map.activity_name, map.user}
+      {"Authorize Session", "Assign Privileges", %{uid: "u1"}}
+      iex> Map.has_key?(map, :privileges)
+      false
   """
   @spec to_map(OCSF.Event.t()) :: map
   def to_map(%OCSF.Event{} = event) do

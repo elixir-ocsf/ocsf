@@ -54,30 +54,71 @@ defmodule OCSF.Events.EntityManagement do
 
   @doc """
   Build a Read entity event (activity_id 2).
+
+  ## Examples
+
+      {:ok, event} =
+        OCSF.Events.EntityManagement.read(
+          entity: %{uid: "e1", type: "User"},
+          status: :Success
+        )
   """
   @spec read(keyword) :: {:ok, OCSF.Event.t()} | {:error, OCSF.Error.t()}
   def read(opts), do: build(2, opts)
 
   @doc """
   Build an Update entity event (activity_id 3).
+
+  ## Examples
+
+      {:ok, event} =
+        OCSF.Events.EntityManagement.update(
+          entity: %{uid: "e1", type: "User", name: "Jane R."},
+          status: :Success
+        )
   """
   @spec update(keyword) :: {:ok, OCSF.Event.t()} | {:error, OCSF.Error.t()}
   def update(opts), do: build(3, opts)
 
   @doc """
   Build a Delete entity event (activity_id 4).
+
+  ## Examples
+
+      {:ok, event} =
+        OCSF.Events.EntityManagement.delete(
+          entity: %{uid: "e1", type: "User"},
+          status: :Success
+        )
   """
   @spec delete(keyword) :: {:ok, OCSF.Event.t()} | {:error, OCSF.Error.t()}
   def delete(opts), do: build(4, opts)
 
   @doc """
   Build an Activate entity event (activity_id 10).
+
+  ## Examples
+
+      {:ok, event} =
+        OCSF.Events.EntityManagement.activate(
+          entity: %{uid: "e1", type: "User"},
+          status: :Success
+        )
   """
   @spec activate(keyword) :: {:ok, OCSF.Event.t()} | {:error, OCSF.Error.t()}
   def activate(opts), do: build(10, opts)
 
   @doc """
   Build a Deactivate entity event (activity_id 11).
+
+  ## Examples
+
+      {:ok, event} =
+        OCSF.Events.EntityManagement.deactivate(
+          entity: %{uid: "e1", type: "User"},
+          status: :Success,
+          status_detail: "offboarding"
+        )
   """
   @spec deactivate(keyword) :: {:ok, OCSF.Event.t()} | {:error, OCSF.Error.t()}
   def deactivate(opts), do: build(11, opts)

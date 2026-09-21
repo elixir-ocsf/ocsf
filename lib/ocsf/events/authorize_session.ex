@@ -59,6 +59,15 @@ defmodule OCSF.Events.AuthorizeSession do
 
   Pass `:groups` (a list of `%OCSF.Group{}` or plain maps) for the
   groups whose membership grants access.
+
+  ## Examples
+
+      {:ok, event} =
+        OCSF.Events.AuthorizeSession.assign_groups(
+          user: %{uid: "u1"},
+          groups: [%{uid: "g1", name: "Admins"}],
+          status: :Success
+        )
   """
   @spec assign_groups(keyword) :: {:ok, OCSF.Event.t()} | {:error, OCSF.Error.t()}
   def assign_groups(opts), do: build(2, opts)
@@ -68,6 +77,15 @@ defmodule OCSF.Events.AuthorizeSession do
 
   Pass `:iam_roles` (a list of `%OCSF.IamRole{}` or plain maps) for the
   roles materialised into the authorized session.
+
+  ## Examples
+
+      {:ok, event} =
+        OCSF.Events.AuthorizeSession.assign_roles(
+          user: %{uid: "u1"},
+          iam_roles: [%{name: "admin", uid: "role-1"}],
+          status: :Success
+        )
   """
   @spec assign_roles(keyword) :: {:ok, OCSF.Event.t()} | {:error, OCSF.Error.t()}
   def assign_roles(opts), do: build(3, opts)

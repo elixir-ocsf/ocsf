@@ -67,24 +67,59 @@ defmodule OCSF.Events.RoleManagement do
 
   @doc """
   Build an Update role event (activity_id 2).
+
+  ## Examples
+
+      {:ok, event} =
+        OCSF.Events.RoleManagement.update(
+          iam_role: %{name: "admin", uid: "role-1"},
+          updated_role: %{name: "admin", uid: "role-1", privileges: ["*"]},
+          status: :Success
+        )
   """
   @spec update(keyword) :: {:ok, OCSF.Event.t()} | {:error, OCSF.Error.t()}
   def update(opts), do: build(2, opts)
 
   @doc """
   Build a Delete role event (activity_id 3).
+
+  ## Examples
+
+      {:ok, event} =
+        OCSF.Events.RoleManagement.delete(
+          iam_role: %{name: "admin", uid: "role-1"},
+          status: :Success
+        )
   """
   @spec delete(keyword) :: {:ok, OCSF.Event.t()} | {:error, OCSF.Error.t()}
   def delete(opts), do: build(3, opts)
 
   @doc """
   Build an Assign Privileges event (activity_id 4).
+
+  ## Examples
+
+      {:ok, event} =
+        OCSF.Events.RoleManagement.assign_privileges(
+          iam_role: %{name: "admin", uid: "role-1"},
+          privileges: ["s3:read"],
+          status: :Success
+        )
   """
   @spec assign_privileges(keyword) :: {:ok, OCSF.Event.t()} | {:error, OCSF.Error.t()}
   def assign_privileges(opts), do: build(4, opts)
 
   @doc """
   Build a Remove Privileges event (activity_id 5).
+
+  ## Examples
+
+      {:ok, event} =
+        OCSF.Events.RoleManagement.remove_privileges(
+          iam_role: %{name: "admin", uid: "role-1"},
+          privileges: ["s3:read"],
+          status: :Success
+        )
   """
   @spec remove_privileges(keyword) :: {:ok, OCSF.Event.t()} | {:error, OCSF.Error.t()}
   def remove_privileges(opts), do: build(5, opts)
@@ -94,30 +129,75 @@ defmodule OCSF.Events.RoleManagement do
 
   Pass `:resources` (a list of `OCSF.ResourceDetails` maps, each with a
   `:name` or `:uid`) granted to the role.
+
+  ## Examples
+
+      {:ok, event} =
+        OCSF.Events.RoleManagement.assign_resources(
+          iam_role: %{name: "admin", uid: "role-1"},
+          resources: [%{uid: "arn:aws:s3:::reports", type: "bucket"}],
+          status: :Success
+        )
   """
   @spec assign_resources(keyword) :: {:ok, OCSF.Event.t()} | {:error, OCSF.Error.t()}
   def assign_resources(opts), do: build(6, opts)
 
   @doc """
   Build a Remove Resources event (activity_id 7).
+
+  ## Examples
+
+      {:ok, event} =
+        OCSF.Events.RoleManagement.remove_resources(
+          iam_role: %{name: "admin", uid: "role-1"},
+          resources: [%{uid: "arn:aws:s3:::reports", type: "bucket"}],
+          status: :Success
+        )
   """
   @spec remove_resources(keyword) :: {:ok, OCSF.Event.t()} | {:error, OCSF.Error.t()}
   def remove_resources(opts), do: build(7, opts)
 
   @doc """
   Build an Attach Policies event (activity_id 8).
+
+  ## Examples
+
+      {:ok, event} =
+        OCSF.Events.RoleManagement.attach_policies(
+          iam_role: %{name: "admin", uid: "role-1"},
+          status_detail: "policy:read-only",
+          status: :Success
+        )
   """
   @spec attach_policies(keyword) :: {:ok, OCSF.Event.t()} | {:error, OCSF.Error.t()}
   def attach_policies(opts), do: build(8, opts)
 
   @doc """
   Build a Detach Policies event (activity_id 9).
+
+  ## Examples
+
+      {:ok, event} =
+        OCSF.Events.RoleManagement.detach_policies(
+          iam_role: %{name: "admin", uid: "role-1"},
+          status_detail: "policy:read-only",
+          status: :Success
+        )
   """
   @spec detach_policies(keyword) :: {:ok, OCSF.Event.t()} | {:error, OCSF.Error.t()}
   def detach_policies(opts), do: build(9, opts)
 
   @doc """
   Build an Add Programmatic Credentials event (activity_id 10).
+
+  ## Examples
+
+      {:ok, event} =
+        OCSF.Events.RoleManagement.add_programmatic_credentials(
+          iam_role: %{name: "admin", uid: "role-1"},
+          status_detail: "access_key",
+          status: :Success
+        )
   """
   @spec add_programmatic_credentials(keyword) ::
           {:ok, OCSF.Event.t()} | {:error, OCSF.Error.t()}
@@ -125,6 +205,15 @@ defmodule OCSF.Events.RoleManagement do
 
   @doc """
   Build a Remove Programmatic Credentials event (activity_id 11).
+
+  ## Examples
+
+      {:ok, event} =
+        OCSF.Events.RoleManagement.remove_programmatic_credentials(
+          iam_role: %{name: "admin", uid: "role-1"},
+          status_detail: "access_key",
+          status: :Success
+        )
   """
   @spec remove_programmatic_credentials(keyword) ::
           {:ok, OCSF.Event.t()} | {:error, OCSF.Error.t()}

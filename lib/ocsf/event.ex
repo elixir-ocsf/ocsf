@@ -192,6 +192,17 @@ defmodule OCSF.Event do
   `{:ok, ^event}` (modulo nil-omitted fields).
 
   Delegates to `OCSF.Deserializer.from_map/1`.
+
+  ## Examples
+
+      json = ~s({"class_uid": 3002, "metadata": {"uid": "..."}, ...})
+
+      {:ok, event} = json |> Jason.decode!() |> OCSF.Event.from_map()
+      event.class_uid
+      #=> 3002
+
+      OCSF.Event.from_map(%{"class_uid" => 3002, "groups" => %{"uid" => "g1"}})
+      #=> {:error, %OCSF.Error{reason: :type_mismatch, path: "groups", ...}}
   """
   @spec from_map(map) :: {:ok, t} | {:error, OCSF.Error.t()}
   def from_map(map) when is_map(map), do: OCSF.Deserializer.from_map(map)

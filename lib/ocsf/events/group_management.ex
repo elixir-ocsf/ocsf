@@ -38,12 +38,30 @@ defmodule OCSF.Events.GroupManagement do
 
   @doc """
   Build an Assign Privileges event (activity_id 1).
+
+  ## Examples
+
+      {:ok, event} =
+        OCSF.Events.GroupManagement.assign_privileges(
+          group: %{uid: "g1", name: "Admins"},
+          privileges: ["billing:read"],
+          status: :Success
+        )
   """
   @spec assign_privileges(keyword) :: {:ok, OCSF.Event.t()} | {:error, OCSF.Error.t()}
   def assign_privileges(opts), do: build(1, opts)
 
   @doc """
   Build a Revoke Privileges event (activity_id 2).
+
+  ## Examples
+
+      {:ok, event} =
+        OCSF.Events.GroupManagement.revoke_privileges(
+          group: %{uid: "g1", name: "Admins"},
+          privileges: ["billing:read"],
+          status: :Success
+        )
   """
   @spec revoke_privileges(keyword) :: {:ok, OCSF.Event.t()} | {:error, OCSF.Error.t()}
   def revoke_privileges(opts), do: build(2, opts)
@@ -73,30 +91,74 @@ defmodule OCSF.Events.GroupManagement do
 
   @doc """
   Build a Remove User event (activity_id 4).
+
+  ## Examples
+
+      {:ok, event} =
+        OCSF.Events.GroupManagement.remove_user(
+          group: %{uid: "g1", name: "Admins"},
+          user: %{uid: "u1"},
+          status: :Success
+        )
   """
   @spec remove_user(keyword) :: {:ok, OCSF.Event.t()} | {:error, OCSF.Error.t()}
   def remove_user(opts), do: build(4, opts)
 
   @doc """
   Build a Delete group event (activity_id 5).
+
+  ## Examples
+
+      {:ok, event} =
+        OCSF.Events.GroupManagement.delete(
+          group: %{uid: "g1", name: "Admins"},
+          status: :Success
+        )
   """
   @spec delete(keyword) :: {:ok, OCSF.Event.t()} | {:error, OCSF.Error.t()}
   def delete(opts), do: build(5, opts)
 
   @doc """
   Build a Create group event (activity_id 6).
+
+  ## Examples
+
+      {:ok, event} =
+        OCSF.Events.GroupManagement.create(
+          group: %{uid: "g1", name: "Admins"},
+          actor: %{user: %{uid: "admin-1"}},
+          status: :Success
+        )
   """
   @spec create(keyword) :: {:ok, OCSF.Event.t()} | {:error, OCSF.Error.t()}
   def create(opts), do: build(6, opts)
 
   @doc """
   Build an Add Subgroup event (activity_id 7).
+
+  ## Examples
+
+      {:ok, event} =
+        OCSF.Events.GroupManagement.add_subgroup(
+          group: %{uid: "g1", name: "Admins"},
+          status_detail: "subgroup:g2",
+          status: :Success
+        )
   """
   @spec add_subgroup(keyword) :: {:ok, OCSF.Event.t()} | {:error, OCSF.Error.t()}
   def add_subgroup(opts), do: build(7, opts)
 
   @doc """
   Build a Remove Subgroup event (activity_id 8).
+
+  ## Examples
+
+      {:ok, event} =
+        OCSF.Events.GroupManagement.remove_subgroup(
+          group: %{uid: "g1", name: "Admins"},
+          status_detail: "subgroup:g2",
+          status: :Success
+        )
   """
   @spec remove_subgroup(keyword) :: {:ok, OCSF.Event.t()} | {:error, OCSF.Error.t()}
   def remove_subgroup(opts), do: build(8, opts)

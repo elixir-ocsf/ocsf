@@ -52,24 +52,63 @@ defmodule OCSF.Events.Authentication do
 
   @doc """
   Build a Logoff authentication event (activity_id 2).
+
+  ## Examples
+
+      {:ok, event} =
+        OCSF.Events.Authentication.logoff(
+          user: %{uid: "u1"},
+          service: %{name: "Cryptr Auth"},
+          status: :Success
+        )
   """
   @spec logoff(keyword) :: {:ok, OCSF.Event.t()} | {:error, OCSF.Error.t()}
   def logoff(opts), do: build(2, opts)
 
   @doc """
   Build a Preauth authentication event (activity_id 6).
+
+  ## Examples
+
+      {:ok, event} =
+        OCSF.Events.Authentication.preauth(
+          user: %{uid: "u1"},
+          service: %{name: "Cryptr Auth"},
+          auth_protocol: :SAML,
+          status: :Success
+        )
   """
   @spec preauth(keyword) :: {:ok, OCSF.Event.t()} | {:error, OCSF.Error.t()}
   def preauth(opts), do: build(6, opts)
 
   @doc """
   Build an Authentication Ticket event (activity_id 3).
+
+  ## Examples
+
+      {:ok, event} =
+        OCSF.Events.Authentication.authentication_ticket(
+          user: %{uid: "u1"},
+          service: %{name: "Cryptr Auth"},
+          auth_protocol: :Kerberos,
+          status: :Success
+        )
   """
   @spec authentication_ticket(keyword) :: {:ok, OCSF.Event.t()} | {:error, OCSF.Error.t()}
   def authentication_ticket(opts), do: build(3, opts)
 
   @doc """
   Build an Account Switch event (activity_id 7).
+
+  ## Examples
+
+      {:ok, event} =
+        OCSF.Events.Authentication.account_switch(
+          user: %{uid: "u1"},
+          service: %{name: "Cryptr Auth"},
+          actor: %{user: %{uid: "admin-1"}},
+          status: :Success
+        )
   """
   @spec account_switch(keyword) :: {:ok, OCSF.Event.t()} | {:error, OCSF.Error.t()}
   def account_switch(opts), do: build(7, opts)

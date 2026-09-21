@@ -60,18 +60,50 @@ defmodule OCSF.Events.ApiActivity do
 
   @doc """
   Build a Read API Activity event (activity_id 2).
+
+  ## Examples
+
+      {:ok, event} =
+        OCSF.Events.ApiActivity.read(
+          api: %{operation: "UpdateUser", service: %{name: "scim"}},
+          actor: %{user: %{uid: "admin-1"}},
+          src_endpoint: %{ip: "10.0.0.1"},
+          status: :Success
+        )
   """
   @spec read(keyword) :: {:ok, OCSF.Event.t()} | {:error, OCSF.Error.t()}
   def read(opts), do: build(2, opts)
 
   @doc """
   Build an Update API Activity event (activity_id 3).
+
+  ## Examples
+
+      {:ok, event} =
+        OCSF.Events.ApiActivity.update(
+          api: %{operation: "UpdateUser", service: %{name: "scim"}},
+          actor: %{user: %{uid: "admin-1"}},
+          src_endpoint: %{ip: "10.0.0.1"},
+          resources: [%{uid: "user/u-42", type: "user"}],
+          status: :Success
+        )
   """
   @spec update(keyword) :: {:ok, OCSF.Event.t()} | {:error, OCSF.Error.t()}
   def update(opts), do: build(3, opts)
 
   @doc """
   Build a Delete API Activity event (activity_id 4).
+
+  ## Examples
+
+      {:ok, event} =
+        OCSF.Events.ApiActivity.delete(
+          api: %{operation: "UpdateUser", service: %{name: "scim"}},
+          actor: %{user: %{uid: "admin-1"}},
+          src_endpoint: %{ip: "10.0.0.1"},
+          resources: [%{uid: "user/u-42", type: "user"}],
+          status: :Success
+        )
   """
   @spec delete(keyword) :: {:ok, OCSF.Event.t()} | {:error, OCSF.Error.t()}
   def delete(opts), do: build(4, opts)
