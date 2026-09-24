@@ -84,7 +84,7 @@ defmodule OCSF.Events.GroupManagementTest do
 
     test "auto-generates metadata.uid and stamps version" do
       assert {:ok, event} = GroupManagement.create(base_opts())
-      assert event.metadata.version == "1.8.0"
+      assert event.metadata.version == "1.9.0"
       assert byte_size(event.metadata.uid) > 0
     end
 
@@ -109,14 +109,14 @@ defmodule OCSF.Events.GroupManagementTest do
         |> Keyword.put(:unmapped, %{"k" => "v"})
 
       assert {:ok, event} = GroupManagement.create(opts)
-      assert event.metadata.version == "1.8.0"
+      assert event.metadata.version == "1.9.0"
       assert event.metadata.trace_uid == "t-1"
       assert event.metadata.span_uid == "s-1"
       assert event.metadata.event_code == "gm:create"
       assert event.unmapped == %{"k" => "v"}
     end
 
-    test "passes optional actor and service through" do
+    test "passes optional actor through, ignores service" do
       opts =
         base_opts()
         |> Keyword.put(:actor, %Actor{user: %User{uid: "admin-1"}})
@@ -124,7 +124,16 @@ defmodule OCSF.Events.GroupManagementTest do
 
       assert {:ok, event} = GroupManagement.create(opts)
       assert event.actor.user.uid == "admin-1"
-      assert event.service.name == "scim"
+      # Group Management (3006) defines no top-level service attribute.
+      assert event.service == nil
+    end
+
+    test "casts resources to %OCSF.ResourceDetails{} and keeps them schema-conformant" do
+      opts = Keyword.put(base_opts(), :resources, [%{name: "reports", type: "bucket"}])
+
+      assert {:ok, event} = GroupManagement.assign_privileges(opts)
+      assert [%OCSF.ResourceDetails{name: "reports", type: "bucket"}] = event.resources
+      assert {:ok, []} = SchemaValidator.validate_event(OCSF.to_map(event), @schema)
     end
   end
 

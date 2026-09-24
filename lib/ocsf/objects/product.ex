@@ -6,7 +6,7 @@ defmodule OCSF.Product do
   Nested inside `OCSF.Metadata` as the `:product` field.
 
   Corresponds to the OCSF
-  [Product](https://schema.ocsf.io/1.8.0/objects/product) object.
+  [Product](https://schema.ocsf.io/1.9.0/objects/product) object.
 
   ## Fields
 

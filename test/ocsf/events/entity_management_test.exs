@@ -82,7 +82,7 @@ defmodule OCSF.Events.EntityManagementTest do
 
     test "auto-generates metadata.uid and stamps version" do
       assert {:ok, event} = EntityManagement.create(base_opts())
-      assert event.metadata.version == "1.8.0"
+      assert event.metadata.version == "1.9.0"
       assert byte_size(event.metadata.uid) > 0
     end
 
@@ -93,16 +93,19 @@ defmodule OCSF.Events.EntityManagementTest do
       end)
     end
 
-    test "passes optional actor and service through" do
+    test "passes optional actor and status_detail through, ignores user and service" do
       opts =
         base_opts()
         |> Keyword.put(:actor, %Actor{user: %User{uid: "admin-1"}})
+        |> Keyword.put(:user, %User{uid: "u1"})
         |> Keyword.put(:service, %Service{name: "scim"})
         |> Keyword.put(:status_detail, "synced")
 
       assert {:ok, event} = EntityManagement.create(opts)
       assert event.actor.user.uid == "admin-1"
-      assert event.service.name == "scim"
+      # Entity Management (3004) defines no top-level user or service.
+      assert event.user == nil
+      assert event.service == nil
       assert event.status_detail == "synced"
     end
   end
@@ -217,7 +220,7 @@ defmodule OCSF.Events.EntityManagementTest do
         })
 
       assert {:ok, event} = EntityManagement.create(opts)
-      assert event.metadata.version == "1.8.0"
+      assert event.metadata.version == "1.9.0"
       assert event.metadata.trace_uid == "t-1"
     end
 

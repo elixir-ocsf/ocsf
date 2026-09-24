@@ -15,7 +15,29 @@ defmodule OCSF.Serializer do
   Convert an `%OCSF.Event{}` to an OCSF-compliant nested map.
 
   Nil fields are omitted. Integer UIDs are emitted as-is; their
-  corresponding `_name` labels are added alongside.
+  corresponding `_name` labels are added alongside. Empty lists are
+  omitted too, so `privileges: []` never reaches the sink.
+
+  ## Examples
+
+      iex> {:ok, event} =
+      ...>   OCSF.Event.new(
+      ...>     metadata: %OCSF.Metadata{uid: "m1", version: "1.9.0"},
+      ...>     time: ~U[2026-04-15 10:00:00Z],
+      ...>     category_uid: 3,
+      ...>     class_uid: 3003,
+      ...>     type_uid: 300_301,
+      ...>     activity_id: 1,
+      ...>     severity_id: 1,
+      ...>     status_id: 1,
+      ...>     user: %{uid: "u1"},
+      ...>     privileges: []
+      ...>   )
+      iex> map = OCSF.Serializer.to_map(event)
+      iex> {map.class_name, map.activity_name, map.user}
+      {"Authorize Session", "Assign Privileges", %{uid: "u1"}}
+      iex> Map.has_key?(map, :privileges)
+      false
   """
   @spec to_map(OCSF.Event.t()) :: map
   def to_map(%OCSF.Event{} = event) do
@@ -38,8 +60,16 @@ defmodule OCSF.Serializer do
     |> put_auth_protocol_name(event.auth_protocol_id)
     |> put_not_nil(:actor, serialize_actor(event.actor))
     |> put_not_nil(:user, serialize_user(event.user))
+    |> put_not_nil(:updated_user, serialize_user(event.updated_user))
     |> put_not_nil(:entity, serialize_entity(event.entity))
     |> put_not_nil(:group, serialize_group(event.group))
+    |> put_not_empty_list(:groups, event.groups, &serialize_group/1)
+    |> put_not_nil(:iam_role, serialize_iam_role(event.iam_role))
+    |> put_not_empty_list(:iam_roles, event.iam_roles, &serialize_iam_role/1)
+    |> put_not_nil(:updated_role, serialize_iam_role(event.updated_role))
+    |> put_not_nil(:api, serialize_api(event.api))
+    |> put_not_empty_list(:privileges, event.privileges)
+    |> put_not_empty_list(:resources, event.resources, &serialize_resource_details/1)
     |> put_not_nil(:http_request, serialize_http_request(event.http_request))
     |> put_not_nil(:src_endpoint, serialize_endpoint(event.src_endpoint))
     |> put_not_nil(:dst_endpoint, serialize_endpoint(event.dst_endpoint))
@@ -101,6 +131,21 @@ defmodule OCSF.Serializer do
     |> put_not_nil(:name, o.name)
   end
 
+  defp serialize_iam_role(nil), do: nil
+
+  defp serialize_iam_role(%OCSF.IamRole{} = r) do
+    %{}
+    |> put_not_nil(:name, r.name)
+    |> put_not_nil(:uid, r.uid)
+    |> put_not_nil(:account, r.account)
+    |> put_not_nil(:uid_alt, r.uid_alt)
+    |> put_not_empty_list(:policies, r.policies)
+    |> put_not_empty_list(:privileges, r.privileges)
+    |> put_not_empty_list(:resources, r.resources, &serialize_resource_details/1)
+    |> put_not_empty_list(:programmatic_credentials, r.programmatic_credentials)
+    |> put_not_nil(:session, r.session)
+  end
+
   defp serialize_entity(nil), do: nil
 
   defp serialize_entity(%OCSF.Entity{} = e) do
@@ -120,6 +165,30 @@ defmodule OCSF.Serializer do
     |> put_not_nil(:uid, g.uid)
     |> put_not_nil(:type, g.type)
     |> put_not_nil(:desc, g.desc)
+  end
+
+  defp serialize_resource_details(%OCSF.ResourceDetails{} = r) do
+    %{}
+    |> put_not_nil(:name, r.name)
+    |> put_not_nil(:uid, r.uid)
+    |> put_not_nil(:uid_alt, r.uid_alt)
+    |> put_not_nil(:type, r.type)
+    |> put_not_empty_list(:labels, r.labels)
+    |> put_not_nil(:namespace, r.namespace)
+    |> put_not_nil(:region, r.region)
+    |> put_not_nil(:version, r.version)
+    |> put_not_nil(:owner, serialize_user(r.owner))
+    |> put_not_nil(:group, serialize_group(r.group))
+    |> put_not_nil(:data, r.data)
+  end
+
+  defp serialize_api(nil), do: nil
+
+  defp serialize_api(%OCSF.Api{} = a) do
+    %{}
+    |> put_not_nil(:operation, a.operation)
+    |> put_not_nil(:version, a.version)
+    |> put_not_nil(:service, serialize_service(a.service))
   end
 
   defp serialize_actor(nil), do: nil
@@ -170,8 +239,14 @@ defmodule OCSF.Serializer do
   defp put_not_nil(map, _key, nil), do: map
   defp put_not_nil(map, key, value), do: Map.put(map, key, value)
 
-  defp put_not_empty_list(map, _key, []), do: map
-  defp put_not_empty_list(map, key, list), do: Map.put(map, key, list)
+  # Lists are emitted only when non-empty, mapped element-wise through
+  # `mapper` (identity for scalar lists such as privileges or profiles).
+  defp put_not_empty_list(map, key, list, mapper \\ &Function.identity/1)
+  defp put_not_empty_list(map, _key, nil, _mapper), do: map
+  defp put_not_empty_list(map, _key, [], _mapper), do: map
+
+  defp put_not_empty_list(map, key, list, mapper) when is_list(list),
+    do: Map.put(map, key, Enum.map(list, mapper))
 
   defp put_name(map, _key, nil), do: map
   defp put_name(map, key, name), do: Map.put(map, key, Atom.to_string(name))

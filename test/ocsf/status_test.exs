@@ -4,7 +4,7 @@ defmodule OCSF.StatusTest do
   alias OCSF.Status
 
   describe "values/0" do
-    test "covers OCSF 1.8 status values" do
+    test "covers OCSF 1.9 status values" do
       values = Status.values()
       assert {:Unknown, 0} in values
       assert {:Success, 1} in values

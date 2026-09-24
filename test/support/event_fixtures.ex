@@ -5,7 +5,7 @@ defmodule OCSF.EventFixtures do
     [
       metadata: %OCSF.Metadata{
         uid: OCSF.UUID.v7_string(),
-        version: "1.8.0",
+        version: "1.9.0",
         product: %OCSF.Product{name: "Test"}
       },
       time: DateTime.utc_now(),
@@ -15,7 +15,9 @@ defmodule OCSF.EventFixtures do
       activity_id: 1,
       severity_id: 1,
       status_id: 1,
-      user: %OCSF.User{uid: "test-user"}
+      user: %OCSF.User{uid: "test-user"},
+      # Authentication (3002) requires at least one of service/dst_endpoint.
+      service: %OCSF.Service{name: "Test Auth"}
     ]
   end
 

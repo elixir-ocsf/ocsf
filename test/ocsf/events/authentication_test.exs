@@ -7,6 +7,7 @@ defmodule OCSF.Events.AuthenticationTest do
   defp base_opts do
     [
       user: %User{uid: "u1"},
+      service: %Service{name: "Test Auth"},
       severity: :Informational,
       status: :Success,
       metadata: %{product: %Product{name: "Test"}}
@@ -58,9 +59,9 @@ defmodule OCSF.Events.AuthenticationTest do
              )
     end
 
-    test "auto-sets metadata.version to 1.8.0" do
+    test "auto-sets metadata.version to 1.9.0" do
       assert {:ok, event} = Authentication.logon(base_opts())
-      assert event.metadata.version == "1.8.0"
+      assert event.metadata.version == "1.9.0"
     end
   end
 
@@ -122,6 +123,28 @@ defmodule OCSF.Events.AuthenticationTest do
     test "authentication_ticket returns {:error, _} when user is missing" do
       opts = Keyword.delete(base_opts(), :user)
       assert {:error, %Error{}} = Authentication.authentication_ticket(opts)
+    end
+
+    test "returns {:error, :constraint_violated} without service or dst_endpoint" do
+      opts = Keyword.delete(base_opts(), :service)
+
+      assert {:error,
+              %Error{
+                reason: :constraint_violated,
+                path: "service|dst_endpoint",
+                details: %{at_least_one: [:service, :dst_endpoint], class_uid: 3002}
+              }} = Authentication.logon(opts)
+    end
+
+    test "dst_endpoint alone satisfies the at_least_one constraint" do
+      opts =
+        base_opts()
+        |> Keyword.delete(:service)
+        |> Keyword.put(:dst_endpoint, %NetworkEndpoint{hostname: "auth.example.com"})
+
+      assert {:ok, event} = Authentication.logon(opts)
+      assert event.service == nil
+      assert event.dst_endpoint.hostname == "auth.example.com"
     end
   end
 
@@ -249,13 +272,13 @@ defmodule OCSF.Events.AuthenticationTest do
       opts =
         Keyword.put(base_opts(), :metadata, %Metadata{
           uid: "pre-set-uid",
-          version: "1.8.0",
+          version: "1.9.0",
           product: %Product{name: "Test"}
         })
 
       assert {:ok, event} = Authentication.logon(opts)
       # version is always overridden to library version
-      assert event.metadata.version == "1.8.0"
+      assert event.metadata.version == "1.9.0"
     end
   end
 

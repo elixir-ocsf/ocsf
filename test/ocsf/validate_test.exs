@@ -16,6 +16,22 @@ defmodule OCSF.ValidateTest do
     test "wrong metadata.version fails" do
       event = put_in(valid_event().metadata.version, "0.9.0")
 
+      assert {:error, %OCSF.Error{reason: :invalid, path: "metadata.version", details: details}} =
+               OCSF.validate(event)
+
+      assert details == %{expected: ["1.8.0", "1.9.0"], got: "0.9.0"}
+    end
+
+    test "every supported metadata.version passes" do
+      for version <- OCSF.supported_versions() do
+        event = put_in(valid_event().metadata.version, version)
+        assert {:ok, _event} = OCSF.validate(event), "#{version} should be accepted"
+      end
+    end
+
+    test "a version older than the supported set fails" do
+      event = put_in(valid_event().metadata.version, "1.7.0")
+
       assert {:error, %OCSF.Error{reason: :invalid, path: "metadata.version"}} =
                OCSF.validate(event)
     end
@@ -93,6 +109,73 @@ defmodule OCSF.ValidateTest do
     test "missing user for Authentication class fails" do
       event = %{valid_event() | user: nil}
       assert {:error, %OCSF.Error{reason: :missing, path: "user"}} = OCSF.validate(event)
+    end
+
+    test "Authentication without service or dst_endpoint violates at_least_one" do
+      event = %{valid_event() | service: nil, dst_endpoint: nil}
+
+      assert {:error, %OCSF.Error{reason: :constraint_violated, path: "service|dst_endpoint"}} =
+               OCSF.validate(event)
+    end
+
+    test "required-field errors take precedence over constraint errors" do
+      event = %{valid_event() | user: nil, service: nil}
+      assert {:error, %OCSF.Error{reason: :missing, path: "user"}} = OCSF.validate(event)
+    end
+
+    test "Authorize Session needs privileges, groups or iam_roles" do
+      base = %{valid_event() | class_uid: 3003, type_uid: 300_301, service: nil}
+
+      assert {:error,
+              %OCSF.Error{reason: :constraint_violated, path: "privileges|groups|iam_roles"}} =
+               OCSF.validate(base)
+
+      assert {:ok, _} = OCSF.validate(%{base | privileges: ["p"]})
+      assert {:ok, _} = OCSF.validate(%{base | groups: [%OCSF.Group{uid: "g1"}]})
+      assert {:ok, _} = OCSF.validate(%{base | iam_roles: [%OCSF.IamRole{uid: "r1"}]})
+
+      assert {:error, %OCSF.Error{reason: :constraint_violated}} =
+               OCSF.validate(%{base | groups: []})
+    end
+
+    test "a non-struct nested object fails with :type_mismatch" do
+      event = %{valid_event() | user: %{uid: "u1"}}
+
+      assert {:error, %OCSF.Error{reason: :type_mismatch, path: "user", details: details}} =
+               OCSF.validate(event)
+
+      assert details.expected == "%OCSF.User{}"
+    end
+
+    test "a wrong struct in a nested object fails with :type_mismatch" do
+      event = %{valid_event() | actor: %OCSF.Actor{user: %OCSF.Group{uid: "g1"}}}
+
+      assert {:error, %OCSF.Error{reason: :type_mismatch, path: "actor.user"}} =
+               OCSF.validate(event)
+    end
+
+    test "list fields must be lists of the right struct" do
+      event = %{valid_event() | iam_roles: %OCSF.IamRole{uid: "r1"}}
+
+      assert {:error, %OCSF.Error{reason: :type_mismatch, path: "iam_roles"}} =
+               OCSF.validate(event)
+
+      event = %{valid_event() | iam_roles: [%OCSF.IamRole{uid: "r1", resources: ["arn:1"]}]}
+
+      assert {:error, %OCSF.Error{reason: :type_mismatch, path: "iam_roles[0].resources[0]"}} =
+               OCSF.validate(event)
+    end
+
+    test "type checks run before the metadata checks" do
+      event = %{valid_event() | metadata: "1.9.0"}
+
+      assert {:error, %OCSF.Error{reason: :type_mismatch, path: "metadata"}} =
+               OCSF.validate(event)
+    end
+
+    test "classes without constraints are unaffected" do
+      event = %{valid_event() | class_uid: 3007, type_uid: 300_701, service: nil}
+      assert {:ok, _} = OCSF.validate(event)
     end
   end
 end

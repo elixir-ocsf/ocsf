@@ -15,7 +15,7 @@ defmodule OCSF.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       name: "OCSF",
-      description: "Elixir library modelling the Open Cybersecurity Schema Framework (OCSF 1.8)",
+      description: "Elixir library modelling the Open Cybersecurity Schema Framework (OCSF 1.9)",
       package: package(),
       docs: docs(),
       elixirc_paths: elixirc_paths(Mix.env()),

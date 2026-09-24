@@ -6,7 +6,7 @@ defmodule OCSF.Actor do
   described by an OCSF event.
 
   Corresponds to the OCSF
-  [Actor](https://schema.ocsf.io/1.8.0/objects/actor) object.
+  [Actor](https://schema.ocsf.io/1.9.0/objects/actor) object.
 
   ## Fields
 

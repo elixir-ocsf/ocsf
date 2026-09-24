@@ -3,7 +3,7 @@ defmodule OCSF.User do
   OCSF User object.
 
   Represents a user identity in an OCSF event. Corresponds to the
-  OCSF [User](https://schema.ocsf.io/1.8.0/objects/user) object.
+  OCSF [User](https://schema.ocsf.io/1.9.0/objects/user) object.
 
   ## Fields
 

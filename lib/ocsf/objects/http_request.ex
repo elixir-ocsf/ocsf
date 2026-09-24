@@ -7,7 +7,7 @@ defmodule OCSF.HttpRequest do
   method.
 
   Corresponds to the OCSF
-  [HTTP Request](https://schema.ocsf.io/1.8.0/objects/http_request) object.
+  [HTTP Request](https://schema.ocsf.io/1.9.0/objects/http_request) object.
 
   ## Fields
 

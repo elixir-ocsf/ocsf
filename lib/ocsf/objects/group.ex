@@ -7,7 +7,7 @@ defmodule OCSF.Group do
   elsewhere in OCSF.
 
   Corresponds to the OCSF
-  [Group](https://schema.ocsf.io/1.8.0/objects/group) object. Carried in
+  [Group](https://schema.ocsf.io/1.9.0/objects/group) object. Carried in
   `OCSF.Event`'s `:group` field, which is required for the Group
   Management class.
 

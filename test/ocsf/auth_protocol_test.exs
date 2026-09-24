@@ -4,7 +4,7 @@ defmodule OCSF.AuthProtocolTest do
   alias OCSF.AuthProtocol
 
   describe "values/0" do
-    test "covers OCSF 1.8 auth protocols" do
+    test "covers OCSF 1.9 auth protocols" do
       values = AuthProtocol.values()
       assert {:Unknown, 0} in values
       assert {:SAML, 5} in values

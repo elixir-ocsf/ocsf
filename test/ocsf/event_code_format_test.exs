@@ -9,7 +9,7 @@ defmodule OCSF.EventCodeFormatTest do
       |> Keyword.merge(
         metadata: %OCSF.Metadata{
           uid: "test-uid",
-          version: "1.8.0",
+          version: "1.9.0",
           product: %OCSF.Product{
             name: "Test",
             feature: %OCSF.Feature{name: "Magic Link"}
@@ -98,7 +98,7 @@ defmodule OCSF.EventCodeFormatTest do
         OCSF.Event.new(
           metadata: %OCSF.Metadata{
             uid: "test-uid",
-            version: "1.8.0",
+            version: "1.9.0",
             product: %OCSF.Product{name: "Test"}
           },
           time: ~U[2026-04-15 10:00:00Z],

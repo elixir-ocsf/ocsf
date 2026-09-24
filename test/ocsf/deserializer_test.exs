@@ -9,7 +9,7 @@ defmodule OCSF.DeserializerTest do
       |> Keyword.merge(
         metadata: %OCSF.Metadata{
           uid: "test-uid",
-          version: "1.8.0",
+          version: "1.9.0",
           product: %OCSF.Product{name: "Test"}
         },
         time: ~U[2026-04-15 10:00:00Z],
@@ -41,6 +41,14 @@ defmodule OCSF.DeserializerTest do
       assert restored.metadata.version == original.metadata.version
       assert restored.user.uid == original.user.uid
       assert restored.time == original.time
+    end
+
+    test "an event persisted under OCSF 1.8.0 still deserializes" do
+      map = OCSF.to_map(valid_event()) |> put_in([:metadata, :version], "1.8.0")
+
+      assert {:ok, restored} = OCSF.Event.from_map(map)
+      assert restored.metadata.version == "1.8.0"
+      assert restored.class_uid == 3002
     end
 
     test "works with string-keyed maps (from Jason.decode!)" do
@@ -83,7 +91,14 @@ defmodule OCSF.DeserializerTest do
     end
 
     test "nil service remains nil" do
-      map = OCSF.to_map(valid_event())
+      # dst_endpoint keeps the 3002 at_least_one constraint satisfied.
+      event = %{
+        valid_event()
+        | service: nil,
+          dst_endpoint: %OCSF.NetworkEndpoint{hostname: "auth.example.com"}
+      }
+
+      map = OCSF.to_map(event)
       refute Map.has_key?(map, :service)
       assert {:ok, restored} = OCSF.Event.from_map(map)
       assert restored.service == nil
@@ -170,7 +185,7 @@ defmodule OCSF.DeserializerTest do
         valid_event()
         | metadata: %OCSF.Metadata{
             uid: "test-uid",
-            version: "1.8.0",
+            version: "1.9.0",
             product: %OCSF.Product{
               name: "TestProduct",
               vendor_name: "Vendor",
@@ -195,7 +210,7 @@ defmodule OCSF.DeserializerTest do
         valid_event()
         | metadata: %OCSF.Metadata{
             uid: "test-uid",
-            version: "1.8.0",
+            version: "1.9.0",
             product: %OCSF.Product{name: "Test"},
             profiles: ["host"],
             event_code: "auth:logon",
@@ -231,6 +246,56 @@ defmodule OCSF.DeserializerTest do
 
       assert {:ok, restored} = OCSF.Event.from_map(map)
       assert restored.src_endpoint.ip == nil
+    end
+
+    test "an object where a list is expected returns a :type_mismatch error" do
+      map = OCSF.to_map(valid_event()) |> Map.put(:groups, %{"uid" => "g1"})
+
+      assert {:error, %OCSF.Error{reason: :type_mismatch, path: "groups", details: details}} =
+               OCSF.Deserializer.from_map(map)
+
+      assert details.expected == "list"
+      assert details.got == %{"uid" => "g1"}
+    end
+
+    test "a list where an object is expected returns a :type_mismatch error" do
+      map = OCSF.to_map(valid_event()) |> Map.put(:user, [%{uid: "u1"}])
+
+      assert {:error, %OCSF.Error{reason: :type_mismatch, path: "user"}} =
+               OCSF.Deserializer.from_map(map)
+    end
+
+    test "a string where metadata is expected returns a :type_mismatch error" do
+      map = OCSF.to_map(valid_event()) |> Map.put(:metadata, "oops")
+
+      assert {:error, %OCSF.Error{reason: :type_mismatch, path: "metadata"}} =
+               OCSF.Deserializer.from_map(map)
+    end
+
+    test "a wrongly-typed nested object is reported with its dotted path" do
+      map = OCSF.to_map(valid_event()) |> Map.put(:user, %{"uid" => "u1", "org" => "acme"})
+
+      assert {:error, %OCSF.Error{reason: :type_mismatch, path: "user.org"}} =
+               OCSF.Deserializer.from_map(map)
+
+      map = OCSF.to_map(valid_event()) |> put_in([:metadata, :product], 42)
+
+      assert {:error, %OCSF.Error{reason: :type_mismatch, path: "metadata.product"}} =
+               OCSF.Deserializer.from_map(map)
+    end
+
+    test "a malformed list element is reported with its index" do
+      map =
+        OCSF.to_map(valid_event())
+        |> Map.put(:resources, [%{"uid" => "arn:1"}, %{"uid" => "arn:2", "owner" => "bob"}])
+
+      assert {:error, %OCSF.Error{reason: :type_mismatch, path: "resources[1].owner"}} =
+               OCSF.Deserializer.from_map(map)
+
+      map = OCSF.to_map(valid_event()) |> Map.put(:privileges, ["read", 7])
+
+      assert {:error, %OCSF.Error{reason: :type_mismatch, path: "privileges[1]"}} =
+               OCSF.Deserializer.from_map(map)
     end
 
     test "parse_time with nil returns nil" do
@@ -300,6 +365,34 @@ defmodule OCSF.DeserializerTest do
       assert restored.dst_endpoint.hostname == "dst.example.com"
     end
 
+    test "string-keyed resources are parsed into %OCSF.ResourceDetails{} with nested owner" do
+      event = %{
+        valid_event()
+        | resources: [
+            %OCSF.ResourceDetails{
+              uid: "arn:1",
+              labels: ["prod"],
+              owner: %OCSF.User{uid: "o1", org: %OCSF.Organization{uid: "acme"}},
+              group: %OCSF.Group{uid: "g1"},
+              data: %{"tier" => "gold"}
+            }
+          ]
+      }
+
+      string_map = event |> Jason.encode!() |> Jason.decode!()
+      assert {:ok, restored} = OCSF.Event.from_map(string_map)
+
+      assert [
+               %OCSF.ResourceDetails{
+                 uid: "arn:1",
+                 labels: ["prod"],
+                 owner: %OCSF.User{uid: "o1", org: %OCSF.Organization{uid: "acme"}},
+                 group: %OCSF.Group{uid: "g1"},
+                 data: %{"tier" => "gold"}
+               }
+             ] = restored.resources
+    end
+
     test "parses metadata with nil product (no feature)" do
       map =
         OCSF.to_map(valid_event())
@@ -307,7 +400,7 @@ defmodule OCSF.DeserializerTest do
         |> Map.delete(:metadata)
         |> Map.put(:metadata, %{
           uid: "test-uid",
-          version: "1.8.0",
+          version: "1.9.0",
           product: nil,
           profiles: []
         })

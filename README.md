@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
-Elixir library modelling the [Open Cybersecurity Schema Framework (OCSF 1.8)](https://schema.ocsf.io/1.8.0/).
+Elixir library modelling the [Open Cybersecurity Schema Framework (OCSF 1.9)](https://schema.ocsf.io/1.9.0/).
 
 Build, validate, and serialize security events that are OCSF-compliant
 out of the box. Persistence-agnostic core with optional companion
@@ -44,7 +44,7 @@ When published to hex.pm:
 
 ```elixir
 OCSF.version()
-#=> "1.8.0"
+#=> "1.9.0"
 ```
 
 ### Explore enums
@@ -63,7 +63,7 @@ OCSF.Severity.name(1)
 #=> :Informational
 ```
 
-### Build an Authentication event (M1 -- coming soon)
+### Build an Authentication event
 
 ```elixir
 {:ok, event} =
@@ -162,7 +162,13 @@ Write             Project to flat columns, bulk-insert via sink adapter
 
 | Module                | Purpose                                          |
 |-----------------------|--------------------------------------------------|
-| `OCSF`                | Facade -- `version/0`                            |
+| `OCSF`                | Facade -- `version/0`, `supported_versions/0`, `validate/1`, `to_map/1`, `from_map/1`, `redact/2` |
+| `OCSF.Event`          | Event struct + low-level `new/1`                 |
+| `OCSF.Events.*`       | One builder module per supported class (below)   |
+| `OCSF.Policy`         | Sink redaction policy (`apply/2`)                |
+| `OCSF.Flatten`        | `__`-joined flat projection and its inverse      |
+| `OCSF.EventCodeFormat`| `metadata.event_code` derivation                 |
+| `OCSF.Error`          | Tagged error struct returned by all failures     |
 | `OCSF.Category`       | Category UID <-> name lookup                     |
 | `OCSF.Class`          | Class UID <-> name lookup + `category/1`         |
 | `OCSF.Activity`       | Per-class activity ID <-> label                  |
@@ -178,26 +184,44 @@ Write             Project to flat columns, bulk-insert via sink adapter
 
 | Struct                 | OCSF object                                                                                   |
 |------------------------|-----------------------------------------------------------------------------------------------|
-| `OCSF.Metadata`       | [Metadata](https://schema.ocsf.io/1.8.0/objects/metadata)                                     |
-| `OCSF.User`           | [User](https://schema.ocsf.io/1.8.0/objects/user)                                             |
-| `OCSF.Organization`   | [Organization](https://schema.ocsf.io/1.8.0/objects/organization)                             |
-| `OCSF.Product`        | [Product](https://schema.ocsf.io/1.8.0/objects/product)                                       |
-| `OCSF.Feature`        | [Feature](https://schema.ocsf.io/1.8.0/objects/feature)                                       |
-| `OCSF.HttpRequest`    | [HTTP Request](https://schema.ocsf.io/1.8.0/objects/http_request)                             |
-| `OCSF.NetworkEndpoint`| [Network Endpoint](https://schema.ocsf.io/1.8.0/objects/network_endpoint)                     |
-| `OCSF.Actor`          | [Actor](https://schema.ocsf.io/1.8.0/objects/actor)                                           |
-| `OCSF.Service`        | [Service](https://schema.ocsf.io/1.8.0/objects/service)                                       |
+| `OCSF.Metadata`       | [Metadata](https://schema.ocsf.io/1.9.0/objects/metadata)                                     |
+| `OCSF.User`           | [User](https://schema.ocsf.io/1.9.0/objects/user)                                             |
+| `OCSF.Organization`   | [Organization](https://schema.ocsf.io/1.9.0/objects/organization)                             |
+| `OCSF.Product`        | [Product](https://schema.ocsf.io/1.9.0/objects/product)                                       |
+| `OCSF.Feature`        | [Feature](https://schema.ocsf.io/1.9.0/objects/feature)                                       |
+| `OCSF.HttpRequest`    | [HTTP Request](https://schema.ocsf.io/1.9.0/objects/http_request)                             |
+| `OCSF.NetworkEndpoint`| [Network Endpoint](https://schema.ocsf.io/1.9.0/objects/network_endpoint)                     |
+| `OCSF.Actor`          | [Actor](https://schema.ocsf.io/1.9.0/objects/actor)                                           |
+| `OCSF.Service`        | [Service](https://schema.ocsf.io/1.9.0/objects/service)                                       |
+| `OCSF.Entity`         | [Managed Entity](https://schema.ocsf.io/1.9.0/objects/managed_entity)                         |
+| `OCSF.Group`          | [Group](https://schema.ocsf.io/1.9.0/objects/group)                                           |
+| `OCSF.IamRole`        | [IAM Role](https://schema.ocsf.io/1.9.0/objects/iam_role)                                     |
+| `OCSF.Api`            | [API](https://schema.ocsf.io/1.9.0/objects/api)                                               |
+| `OCSF.ResourceDetails`| [Resource Details](https://schema.ocsf.io/1.9.0/objects/resource_details)                     |
 
 Every struct exposes `__ocsf_fields__/0` for PII classification metadata.
 
 ## Supported OCSF classes
 
-| Class            | UID  | Category                        | Status         |
-|------------------|------|---------------------------------|----------------|
-| Authentication   | 3002 | Identity & Access Management    | v0 (current)   |
-| Account Change   | 3001 | Identity & Access Management    | v1 (planned)   |
-| Authorization    | 3003 | Identity & Access Management    | v1 (planned)   |
-| API Activity     | 6003 | Application Activity            | v1 (planned)   |
+| Class             | UID  | Category                     | Builder module                  |
+|-------------------|------|------------------------------|---------------------------------|
+| Authentication    | 3002 | Identity & Access Management | `OCSF.Events.Authentication`    |
+| Authorize Session | 3003 | Identity & Access Management | `OCSF.Events.AuthorizeSession`  |
+| Entity Management | 3004 | Identity & Access Management | `OCSF.Events.EntityManagement`  |
+| Group Management  | 3006 | Identity & Access Management | `OCSF.Events.GroupManagement`   |
+| User Management   | 3007 | Identity & Access Management | `OCSF.Events.UserManagement`    |
+| Role Management   | 3008 | Identity & Access Management | `OCSF.Events.RoleManagement`    |
+| API Activity      | 6003 | Application Activity         | `OCSF.Events.ApiActivity`       |
+
+Each builder exposes one function per OCSF activity and returns
+`{:ok, %OCSF.Event{}}` or `{:error, %OCSF.Error{}}`. `OCSF.validate/1`
+enforces the class's required fields (e.g. `user` on 3002/3003/3007,
+`iam_role` on 3008, `api`/`actor`/`src_endpoint` on 6003) and its
+`at_least_one` constraints (`service` or `dst_endpoint` on 3002;
+`privileges`, `groups` or `iam_roles` on 3003). Only the attributes a
+class defines are emitted: the caller identity goes in `actor.user`, the
+called service in `api.service`, affected resources in `resources`
+(a list of `OCSF.ResourceDetails`).
 
 ## Compliance model
 
@@ -220,13 +244,19 @@ See `OCSF.Classification` for the full taxonomy.
 
 ## OCSF version policy
 
-One library release targets one OCSF version:
+One library release emits one OCSF version:
 
-- `ocsf 0.x.y` targets OCSF 1.8
-- `ocsf 1.x.y` will target OCSF 1.9 when it ships
+- `ocsf 0.1.x` emitted OCSF 1.8.0
+- `ocsf 0.2.x` and later emit OCSF 1.9.0
+- a breaking OCSF change (none expected within 1.x) means a major bump of
+  the library
 
-`OCSF.version/0` returns the pinned version. Every emitted event carries
+`OCSF.version/0` returns the emitted version. Every event carries
 `metadata.version` so stored rows identify which schema they conform to.
+Because OCSF minor releases are additive, `OCSF.validate/1` and
+`OCSF.from_map/1` accept every version in `OCSF.supported_versions/0`
+(`["1.8.0", "1.9.0"]`), so rows written by an earlier release still read
+back as full events.
 
 ## Naming conventions
 
@@ -274,7 +304,7 @@ verbatim.
 
 ## Links
 
-- [OCSF 1.8 Schema](https://schema.ocsf.io/1.8.0/)
+- [OCSF 1.9 Schema](https://schema.ocsf.io/1.9.0/)
 - [OCSF GitHub](https://github.com/ocsf)
 - [ecto_ch](https://hex.pm/packages/ecto_ch) -- ClickHouse Ecto adapter
 - [uuid_v7](https://hex.pm/packages/uuid_v7) -- UUIDv7 generation

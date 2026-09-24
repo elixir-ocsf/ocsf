@@ -2,12 +2,12 @@ defmodule OCSF.Status do
   @moduledoc """
   OCSF event status.
 
-  Maps event outcome status names to their OCSF 1.8 numeric identifiers.
+  Maps event outcome status names to their OCSF 1.9 numeric identifiers.
   Used by event builders to resolve the `:status` keyword into the
   `status_id` field.
 
   See the OCSF
-  [status_id](https://schema.ocsf.io/1.8.0/data_types/integer?caption=status_id)
+  [status_id](https://schema.ocsf.io/1.9.0/data_types/integer?caption=status_id)
   definition.
 
   ## Values

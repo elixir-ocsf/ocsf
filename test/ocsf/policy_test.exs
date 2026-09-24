@@ -187,6 +187,36 @@ defmodule OCSF.PolicyTest do
       assert redacted.service.secret_token == nil
     end
 
+    test "resources are redacted by policy, including each nested owner" do
+      event = %{
+        valid_event()
+        | resources: [
+            %OCSF.ResourceDetails{
+              uid: "arn:1",
+              name: "bucket",
+              owner: %OCSF.User{uid: "o1", name: "Owner", email_addr: "o@example.com"}
+            },
+            %OCSF.ResourceDetails{uid: "arn:2"}
+          ]
+      }
+
+      policy = %OCSF.Policy{deny: [:contact, :identity], allow: [:identifier, :taxonomic]}
+      redacted = OCSF.Policy.apply(policy, event)
+
+      assert [first, second] = redacted.resources
+      assert first.uid == "arn:1"
+      assert first.name == "bucket"
+      assert first.owner.uid == "o1"
+      assert first.owner.name == nil
+      assert first.owner.email_addr == nil
+      assert second.owner == nil
+    end
+
+    test "nil resources stay nil" do
+      redacted = OCSF.Policy.apply(%OCSF.Policy{}, valid_event())
+      assert redacted.resources == nil
+    end
+
     test "dst_endpoint is redacted by policy" do
       event = %{
         valid_event()

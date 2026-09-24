@@ -68,6 +68,20 @@ defmodule OCSF.EventTest do
       assert %OCSF.NetworkEndpoint{hostname: "host.local"} = event.dst_endpoint
     end
 
+    test "malformed nested values are kept as-is for validate/1 to report" do
+      attrs =
+        valid_attrs()
+        |> Keyword.put(:user, "not-a-map")
+        |> Keyword.put(:groups, %{uid: "g1"})
+        |> Keyword.put(:metadata, 42)
+
+      assert {:ok, event} = OCSF.Event.new(attrs)
+      assert event.user == "not-a-map"
+      assert event.groups == %{uid: "g1"}
+      assert event.metadata == 42
+      assert {:error, %OCSF.Error{reason: :type_mismatch}} = OCSF.validate(event)
+    end
+
     test "cast_if passes through already-struct values" do
       user = %OCSF.User{uid: "u1", name: "Alice"}
       attrs = Keyword.put(valid_attrs(), :user, user)
@@ -78,7 +92,7 @@ defmodule OCSF.EventTest do
     test "cast_metadata passes through already-struct OCSF.Metadata" do
       meta = %OCSF.Metadata{
         uid: "m1",
-        version: "1.8.0",
+        version: "1.9.0",
         product: %OCSF.Product{name: "Test"}
       }
 
@@ -93,7 +107,7 @@ defmodule OCSF.EventTest do
       attrs =
         Keyword.put(valid_attrs(), :metadata, %{
           uid: "m1",
-          version: "1.8.0",
+          version: "1.9.0",
           product: product
         })
 
@@ -107,7 +121,7 @@ defmodule OCSF.EventTest do
       attrs =
         Keyword.put(valid_attrs(), :metadata, %{
           uid: "m1",
-          version: "1.8.0",
+          version: "1.9.0",
           product: %{name: "Test", feature: feature}
         })
 
@@ -119,7 +133,7 @@ defmodule OCSF.EventTest do
       attrs =
         Keyword.put(valid_attrs(), :metadata, %{
           uid: "m1",
-          version: "1.8.0",
+          version: "1.9.0",
           product: nil
         })
 
@@ -131,7 +145,7 @@ defmodule OCSF.EventTest do
       attrs =
         Keyword.put(valid_attrs(), :metadata, %{
           uid: "m1",
-          version: "1.8.0",
+          version: "1.9.0",
           product: %{name: "Test", feature: nil}
         })
 
@@ -162,7 +176,7 @@ defmodule OCSF.EventTest do
       attrs = %{
         "metadata" => %{
           "uid" => "test-uid",
-          "version" => "1.8.0",
+          "version" => "1.9.0",
           "product" => %{"name" => "Test"}
         },
         "time" => ~U[2026-04-15 10:00:00Z],
@@ -186,7 +200,7 @@ defmodule OCSF.EventTest do
       attrs = %{
         "metadata" => %{
           "uid" => "test-uid",
-          "version" => "1.8.0",
+          "version" => "1.9.0",
           "product" => %{
             "name" => "Test",
             "feature" => %{"name" => "Login", "uid" => "f1", "version" => "1.0"},
@@ -220,7 +234,7 @@ defmodule OCSF.EventTest do
       attrs = %{
         "metadata" => %{
           "uid" => "test-uid",
-          "version" => "1.8.0",
+          "version" => "1.9.0",
           "product" => %{"name" => "Test"}
         },
         "time" => ~U[2026-04-15 10:00:00Z],

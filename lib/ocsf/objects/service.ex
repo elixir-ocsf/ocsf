@@ -6,7 +6,7 @@ defmodule OCSF.Service do
   as the service being authenticated against or the API being called.
 
   Corresponds to the OCSF
-  [Service](https://schema.ocsf.io/1.8.0/objects/service) object.
+  [Service](https://schema.ocsf.io/1.9.0/objects/service) object.
 
   ## Fields
 

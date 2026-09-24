@@ -7,7 +7,7 @@ defmodule OCSF.Feature do
   `:feature` field.
 
   Corresponds to the OCSF
-  [Feature](https://schema.ocsf.io/1.8.0/objects/feature) object.
+  [Feature](https://schema.ocsf.io/1.9.0/objects/feature) object.
 
   ## Fields
 

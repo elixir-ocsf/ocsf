@@ -3,7 +3,7 @@ defmodule OCSF.Event do
   OCSF event struct.
 
   Represents a single OCSF-compliant security event. Mirrors the
-  [OCSF 1.8 base event](https://schema.ocsf.io/1.8.0/base_event) with
+  [OCSF 1.9 base event](https://schema.ocsf.io/1.9.0/base_event) with
   nested object structs for `metadata`, `user`, `http_request`, etc.
 
   Use per-class builders (`OCSF.Events.Authentication`) rather than
@@ -23,9 +23,24 @@ defmodule OCSF.Event do
   - `:status_id` — integer. Event status.
   - `:status_detail` — `String.t() | nil`. Free-form detail.
   - `:auth_protocol_id` — `integer | nil`. Auth protocol.
-  - `:user` — `%OCSF.User{} | nil`.
+  - `:user` — `%OCSF.User{} | nil`. Required for User Management (3007).
+  - `:updated_user` — `%OCSF.User{} | nil`. Target user after a User
+    Management (3007) change, when distinct from the acting `user`.
   - `:entity` — `%OCSF.Entity{} | nil`. Required for Entity Management (3004).
   - `:group` — `%OCSF.Group{} | nil`. Required for Group Management (3006).
+  - `:groups` — `[OCSF.Group.t()] | nil`. Groups assigned to the session
+    in an Authorize Session (3003) event.
+  - `:iam_role` — `%OCSF.IamRole{} | nil`. Required for Role Management (3008).
+  - `:iam_roles` — `[OCSF.IamRole.t()] | nil`. Roles assigned/removed in a
+    User Management (3007) or Authorize Session (3003) event.
+  - `:updated_role` — `%OCSF.IamRole{} | nil`. Target role after a Role
+    Management (3008) change, when distinct from `iam_role`.
+  - `:api` — `%OCSF.Api{} | nil`. Required for API Activity (6003).
+  - `:privileges` — `[String.t()] | nil`. List of assigned/removed
+    privileges.
+  - `:resources` — `[OCSF.ResourceDetails.t()] | nil`. Resources
+    affected by, or granted through, the activity (Group Management 3006,
+    User Management 3007, Role Management 3008, API Activity 6003).
   - `:actor` — `%OCSF.Actor{} | nil`.
   - `:http_request` — `%OCSF.HttpRequest{} | nil`.
   - `:src_endpoint` — `%OCSF.NetworkEndpoint{} | nil`.
@@ -50,8 +65,16 @@ defmodule OCSF.Event do
           auth_protocol_id: integer | nil,
           actor: OCSF.Actor.t() | nil,
           user: OCSF.User.t() | nil,
+          updated_user: OCSF.User.t() | nil,
           entity: OCSF.Entity.t() | nil,
           group: OCSF.Group.t() | nil,
+          groups: [OCSF.Group.t()] | nil,
+          iam_role: OCSF.IamRole.t() | nil,
+          iam_roles: [OCSF.IamRole.t()] | nil,
+          updated_role: OCSF.IamRole.t() | nil,
+          api: OCSF.Api.t() | nil,
+          privileges: [String.t()] | nil,
+          resources: [OCSF.ResourceDetails.t()] | nil,
           http_request: OCSF.HttpRequest.t() | nil,
           src_endpoint: OCSF.NetworkEndpoint.t() | nil,
           dst_endpoint: OCSF.NetworkEndpoint.t() | nil,
@@ -73,8 +96,16 @@ defmodule OCSF.Event do
     :auth_protocol_id,
     :actor,
     :user,
+    :updated_user,
     :entity,
     :group,
+    :groups,
+    :iam_role,
+    :iam_roles,
+    :updated_role,
+    :api,
+    :privileges,
+    :resources,
     :http_request,
     :src_endpoint,
     :dst_endpoint,
@@ -98,7 +129,7 @@ defmodule OCSF.Event do
       iex> {:ok, event} = OCSF.Event.new(
       ...>   metadata: %OCSF.Metadata{
       ...>     uid: "test-uid",
-      ...>     version: "1.8.0",
+      ...>     version: "1.9.0",
       ...>     product: %OCSF.Product{name: "Test"}
       ...>   },
       ...>   time: ~U[2026-04-15 10:00:00Z],
@@ -131,8 +162,16 @@ defmodule OCSF.Event do
       auth_protocol_id: get_attr(attrs, :auth_protocol_id),
       actor: cast_if(get_attr(attrs, :actor), OCSF.Actor),
       user: cast_if(get_attr(attrs, :user), OCSF.User),
+      updated_user: cast_if(get_attr(attrs, :updated_user), OCSF.User),
       entity: cast_if(get_attr(attrs, :entity), OCSF.Entity),
       group: cast_if(get_attr(attrs, :group), OCSF.Group),
+      groups: cast_list_if(get_attr(attrs, :groups), OCSF.Group),
+      iam_role: cast_if(get_attr(attrs, :iam_role), OCSF.IamRole),
+      iam_roles: cast_list_if(get_attr(attrs, :iam_roles), OCSF.IamRole),
+      updated_role: cast_if(get_attr(attrs, :updated_role), OCSF.IamRole),
+      api: cast_if(get_attr(attrs, :api), OCSF.Api),
+      privileges: get_attr(attrs, :privileges),
+      resources: cast_list_if(get_attr(attrs, :resources), OCSF.ResourceDetails),
       http_request: cast_if(get_attr(attrs, :http_request), OCSF.HttpRequest),
       src_endpoint: cast_if(get_attr(attrs, :src_endpoint), OCSF.NetworkEndpoint),
       dst_endpoint: cast_if(get_attr(attrs, :dst_endpoint), OCSF.NetworkEndpoint),
@@ -153,12 +192,26 @@ defmodule OCSF.Event do
   `{:ok, ^event}` (modulo nil-omitted fields).
 
   Delegates to `OCSF.Deserializer.from_map/1`.
+
+  ## Examples
+
+      json = ~s({"class_uid": 3002, "metadata": {"uid": "..."}, ...})
+
+      {:ok, event} = json |> Jason.decode!() |> OCSF.Event.from_map()
+      event.class_uid
+      #=> 3002
+
+      OCSF.Event.from_map(%{"class_uid" => 3002, "groups" => %{"uid" => "g1"}})
+      #=> {:error, %OCSF.Error{reason: :type_mismatch, path: "groups", ...}}
   """
   @spec from_map(map) :: {:ok, t} | {:error, OCSF.Error.t()}
   def from_map(map) when is_map(map), do: OCSF.Deserializer.from_map(map)
 
+  # Values that are neither nil, a struct nor a map are kept as-is so that
+  # `OCSF.validate/1` reports a `:type_mismatch` instead of this module
+  # raising on malformed input.
   defp cast_metadata(%OCSF.Metadata{} = m), do: m
-  defp cast_metadata(nil), do: nil
+  defp cast_metadata(m) when not is_map(m), do: m
 
   defp cast_metadata(%{} = m) do
     %OCSF.Metadata{
@@ -174,7 +227,7 @@ defmodule OCSF.Event do
   end
 
   defp cast_product(%OCSF.Product{} = p), do: p
-  defp cast_product(nil), do: nil
+  defp cast_product(p) when not is_map(p), do: p
 
   defp cast_product(%{} = p) do
     %OCSF.Product{
@@ -187,7 +240,7 @@ defmodule OCSF.Event do
   end
 
   defp cast_feature(%OCSF.Feature{} = f), do: f
-  defp cast_feature(nil), do: nil
+  defp cast_feature(f) when not is_map(f), do: f
 
   defp cast_feature(%{} = f) do
     %OCSF.Feature{
@@ -199,8 +252,11 @@ defmodule OCSF.Event do
 
   defp get_attr(map, key), do: map[key] || map[to_string(key)]
 
-  defp cast_if(nil, _mod), do: nil
+  defp cast_list_if(list, mod) when is_list(list), do: Enum.map(list, &cast_if(&1, mod))
+  defp cast_list_if(val, _mod), do: val
+
   defp cast_if(%{__struct__: mod} = s, mod), do: s
+  defp cast_if(val, _mod) when not is_map(val), do: val
 
   defp cast_if(%{} = m, mod) do
     fields = mod.__struct__() |> Map.from_struct() |> Map.keys()
@@ -211,23 +267,39 @@ defmodule OCSF.Event do
         {key, val}
       end
 
-    # Handle nested org in User
-    casted =
-      if mod == OCSF.User and is_map(casted[:org]) and
-           not is_struct(casted[:org], OCSF.Organization) do
-        Map.put(casted, :org, cast_if(casted[:org], OCSF.Organization))
-      else
-        casted
-      end
+    struct(mod, cast_nested(mod, casted))
+  end
 
-    # Handle nested user in Actor
-    casted =
-      if mod == OCSF.Actor and is_map(casted[:user]) and not is_struct(casted[:user], OCSF.User) do
-        Map.put(casted, :user, cast_if(casted[:user], OCSF.User))
-      else
-        casted
-      end
+  # Recursively cast the nested objects each parent struct carries.
+  defp cast_nested(OCSF.User, casted), do: maybe_cast(casted, :org, OCSF.Organization)
+  defp cast_nested(OCSF.Actor, casted), do: maybe_cast(casted, :user, OCSF.User)
+  defp cast_nested(OCSF.Api, casted), do: maybe_cast(casted, :service, OCSF.Service)
 
-    struct(mod, casted)
+  defp cast_nested(OCSF.IamRole, casted),
+    do: maybe_cast_list(casted, :resources, OCSF.ResourceDetails)
+
+  defp cast_nested(OCSF.ResourceDetails, casted) do
+    casted
+    |> maybe_cast(:owner, OCSF.User)
+    |> maybe_cast(:group, OCSF.Group)
+  end
+
+  defp cast_nested(_mod, casted), do: casted
+
+  defp maybe_cast(casted, key, mod) do
+    val = casted[key]
+
+    if is_map(val) and not is_struct(val, mod) do
+      Map.put(casted, key, cast_if(val, mod))
+    else
+      casted
+    end
+  end
+
+  defp maybe_cast_list(casted, key, mod) do
+    case casted[key] do
+      list when is_list(list) -> Map.put(casted, key, cast_list_if(list, mod))
+      _ -> casted
+    end
   end
 end

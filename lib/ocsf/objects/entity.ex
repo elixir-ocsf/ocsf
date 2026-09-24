@@ -7,7 +7,7 @@ defmodule OCSF.Entity do
   updated, or removed.
 
   Corresponds to the OCSF
-  [Managed Entity](https://schema.ocsf.io/1.8.0/objects/managed_entity)
+  [Managed Entity](https://schema.ocsf.io/1.9.0/objects/managed_entity)
   object. Carried in `OCSF.Event`'s `:entity` field, which is required
   for the Entity Management class.
 
