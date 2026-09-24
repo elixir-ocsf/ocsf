@@ -7,16 +7,21 @@ defmodule OCSF.Sink do
   Postgres (`ocsf_ecto`), ClickHouse (`ocsf_clickhouse`), or SIEM
   exporters.
 
-  Every sink declares a `policy/0` that governs which `OCSF.Classification`
-  data classes it accepts. Denied fields are nilled out before insert
-  via `OCSF.Policy.apply/2`.
-
   ## Callbacks
 
+  The generic transport contract — used by the `ocsf_ingest` pipeline — is just
+  `write/1` and `health/0`. `row_for/1` and `policy/0` are **OCSF projection**
+  helpers, used by OCSF sinks (e.g. `ocsf_ecto`) and never by the pipeline, so
+  they are optional: a non-OCSF sink (e.g. a hook-event sink) implements only
+  `write/1` and `health/0`.
+
   - `write/1` — persist a batch of events.
-  - `row_for/1` — project a single event to the sink-specific row shape.
-  - `policy/0` — return the sink's redaction policy.
   - `health/0` — report sink health for liveness checks.
+  - `row_for/1` *(optional)* — project a single event to the sink-specific row
+    shape.
+  - `policy/0` *(optional)* — return the sink's redaction policy; denied
+    `OCSF.Classification` data classes are nilled out before insert via
+    `OCSF.Policy.apply/2`.
 
   ## Example implementation
 
@@ -52,12 +57,14 @@ defmodule OCSF.Sink do
   @doc "Persist a batch of events. Returns `:ok` or `{:error, reason}`."
   @callback write([OCSF.Event.t()]) :: :ok | {:error, term}
 
-  @doc "Project a single event to the sink-specific row shape."
-  @callback row_for(OCSF.Event.t()) :: map
-
-  @doc "Return the sink's redaction policy."
-  @callback policy() :: OCSF.Policy.t()
-
   @doc "Return the sink's current health status."
   @callback health() :: health
+
+  @doc "Project a single event to the sink-specific row shape (OCSF sinks)."
+  @callback row_for(OCSF.Event.t()) :: map
+
+  @doc "Return the sink's redaction policy (OCSF sinks)."
+  @callback policy() :: OCSF.Policy.t()
+
+  @optional_callbacks row_for: 1, policy: 0
 end
