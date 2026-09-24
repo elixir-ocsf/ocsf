@@ -27,15 +27,9 @@ libraries for Postgres and ClickHouse sinks.
 # mix.exs
 def deps do
   [
-    {:ocsf, path: "../ocsf"}
+    {:ocsf, "~> 0.2"}
   ]
 end
-```
-
-When published to hex.pm:
-
-```elixir
-{:ocsf, "~> 0.1"}
 ```
 
 ## Quick start
